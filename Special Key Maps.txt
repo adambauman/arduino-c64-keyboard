@@ -1,0 +1,23 @@
+Restore on I8
+
+commodore = alt
+shiftlock = capslock
+leftArrow = tilde
+restore = backspace
+LBP = $
+upArrow = page up
+crsrVert = down arrow
+crsrHor = right arrow
+runstop = esc
+shift + crsrVert = up arrow
+shift + crsrHor = left arrow
+rightShift + Fkeys = F2, 4, 6 & 8
+leftShift + rightShift + [ = {
+leftShift + rightShift + ] = }
+leftShift + rightSfhit + ? = \
+leftShift + rightSfhit + commodore + ? = |
+shift + - = _
+shift + arrowUp = page down
+leftShift + rightShift = ^
+clrHome = tab
+shift + clrHome = home
