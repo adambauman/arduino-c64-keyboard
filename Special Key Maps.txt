@@ -1,3 +1,6 @@
+** List of special key mappings for missing items
+** Check the Excel doc first, that's more updated!
+
 Restore on I8
 
 commodore = alt
@@ -18,6 +21,12 @@ leftShift + rightSfhit + ? = \
 leftShift + rightSfhit + commodore + ? = |
 shift + - = _
 shift + arrowUp = page down
-leftShift + rightShift = ^
+leftShift + rightShift + uparrow? = ^
 clrHome = tab
 shift + clrHome = home
+
+Ideas for triggering special shift-lock modes:
+
+Commodore + shift-lock: enhanced cursor mode, wasd moves cursor
+
+Commodore + CTRL + shift-lock: 
