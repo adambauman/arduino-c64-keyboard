@@ -1,7 +1,7 @@
 // BauTek C64 PiCase Keyboard Controller
 //
 
-#include <Keyboard.h>
+//#include <Keyboard.h>
 
 // Restore (I8) = 178 (backspace)
 #define pin_row8 1
@@ -43,13 +43,16 @@ unsigned int debounceTime = 10;
 byte keyMapUnmodified[rows][columns] = {
   { 49,  96, 128, 177,  32, 130, 113,  50},
   { 51, 119,  97, 129, 122, 115, 101,  52},
-  { 53, 114, 100, 120,  99, 102, 116,  54},
   { 55, 121, 103, 118,  98, 104, 117,  56},
+  { 53, 114, 100, 120,  99, 102, 116,  54},
   { 57, 105, 106, 110, 109, 107, 111,  48},
   { 43, 112, 108,  44,  46,  58,  64,  45},
   { 36,  42,  59,  47, 133,  61,  94, 179},
   {212, 176, 215, 217, 194, 196, 198, 200}
 };
+
+// Shifted
+
   
 boolean keyMapStatus[rows][columns] = {
   {false,false,false,false,false,false,false,false},
@@ -174,7 +177,7 @@ void WriteKeys() {
   for (byte c = 0; c < columns; c++){
     for (byte r = 0; r < rows; r++) {
       if (keyMapHistory[r][c] == true) {
-        Keyboard.write(keyMapUnmodified[r][c]);
+        Keyboard.write(keyMapUnmodified[c][r]);
       }
     }
   }
@@ -214,4 +217,3 @@ void DebugKeys() {
   Serial.println(shouldSend);
   Serial.println("");
 }
-
