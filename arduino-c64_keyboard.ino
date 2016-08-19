@@ -1,52 +1,79 @@
 // BauTek C64 PiCase Keyboard Controller
 //
+// Utilizes an ATmega32U4-based microcontroller and two CD4051 muxers to run a Commodore64
+// keyboard as a USBHID device. 
+//
+// See included wiring diagrams for hardware setup. The C64 keyboard requires one minor modification, you must
+// de-solder the leads on the SHIFTLOCK key and run one to the microcontroller ground, the other to pin 9.
+//
 
 //#include <Keyboard.h>
 
-// Restore (I8) = 178 (backspace)
+// RESTORE lives outside the muxed matrix, sends BACKSPACE
 #define pin_row8 1
 #define pin_colI 2
+
+// Modified SHIFTLOCK (originally closes SHIFT key in hardware, now runs CAPSLOCK)
 #define pin_shiftLock 9
 
+// Pins connected to the column CD4051
 #define pin_colZ 21
 #define pin_colA0 18
 #define pin_colA1 19
 #define pin_colA2 20
 
+// Pins connected to the row CD4051
 #define pin_rowZ 10
 #define pin_rowA0 14
 #define pin_rowA1 15
 #define pin_rowA2 16
 
+// RGB LED pins (optional, set RGBenabled = TRUE to enable custom LED function)
 #define pin_rgbR 3
 #define pin_rgbG 5
 #define pin_rgbB 6
 
+// Battery level check and sensor pins (optional, set batteryEnabled = TRUE to enable function)
 #define battery_button 7
 #define battery_sensor 8
 
+
+// SETUP PARAMETERS
+// Set TRUE to enable serial debugging
+boolean debugEnabled = true;
+
+// Set TRUE to enable the RGB LED
+boolean RGBenabled = true;
+
+// Set TRUE to enable battery level reading
+boolean batteryEnabled = true;
+// END SETUP PARAMETERS
+
+
+// Size of the keyboard matrix. C64 is technically 9x9 but the RESTORE key lives on its own and is handled seperatly
 const byte rows = 8;
 const byte columns = 8;
 
+// Set if matrix is changed, stops loop from writing unnecessary key commands
 boolean keysHaveChanged = false;
-boolean debugEnabled = true;
 
+// Tracks state of modifier keys (currently unused, running custom OS keymaps instead)
 boolean shiftState = false;
 boolean altState = false;
 boolean ctrlState = false;
 boolean capsLockState = false;
 
+// Tracks RESTORE and SHIFTLOCK parameters
 boolean historyRestore = false;
 boolean historyShiftlock = false;
 boolean statusRestore = false;
 boolean statusShiftlock = false;
 
+// Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
 unsigned long startTime = 0;
 unsigned int debounceTime = 10;
-
-unsigned int keyActiveCount = 0;
   
-// Direct ASCII values of keys to send
+// Matrix of un-modified keycodes (direct ASCII values)
 byte keyMapUnmodified[rows][columns] = {
   { 49,  96, 128, 177,  32, 130, 113,  50},
   { 51, 119,  97, 129, 122, 115, 101,  52},
@@ -58,7 +85,7 @@ byte keyMapUnmodified[rows][columns] = {
   {212, 176, 215, 217, 194, 196, 198, 200}
 };
 
-// ASCII values of keys when SHIFT is down
+// Matrix of SHIFT modified keycodes (direct ASCII values) (currently unused, running custom OS keymaps instead)
 byte keyMapShifted[rows][columns] = {
   { 33, 126,   0,   0,   0,   0,   0,  34},
   { 35,   0,   0,   0,   0,   0,   0,  36},
@@ -68,7 +95,8 @@ byte keyMapShifted[rows][columns] = {
   {  0,   0,   0,  60,  62,  91,   0,  95},
   {  0,   0,  92,  63,   0,   0, 214, 210}
 };
-  
+
+// Matrix of key status during a single scan loop
 boolean keyMapStatus[rows][columns] = {
   {false,false,false,false,false,false,false,false},
   {false,false,false,false,false,false,false,false},
@@ -80,6 +108,7 @@ boolean keyMapStatus[rows][columns] = {
   {false,false,false,false,false,false,false,false}
 };
 
+// Matrix of key status during the last scan loop, compared to determine if keys have changed
 boolean keyMapHistory[rows][columns] = {
   {false,false,false,false,false,false,false,false},
   {false,false,false,false,false,false,false,false},
@@ -91,12 +120,16 @@ boolean keyMapHistory[rows][columns] = {
   {false,false,false,false,false,false,false,false}
 };
 
+
 //
 // setup()
 //
 void setup() {
   if (debugEnabled == true)
     Serial.begin(115200);
+
+  // All key reading pins use the internal pullup resistors
+  pinMode(pin_shiftLock, INPUT_PULLUP);
 
   pinMode(pin_colI, OUTPUT);
   pinMode(pin_row8, INPUT_PULLUP);
@@ -111,18 +144,20 @@ void setup() {
   pinMode(pin_rowA1, OUTPUT);
   pinMode(pin_rowA2, OUTPUT);
 
-  // Row drops low when button shorted to column. Drop columns LOW so they're ready.
+  // Row drops low when button closed to column. Drop columns LOW so they're ready.
   digitalWrite(pin_colZ, LOW);
   digitalWrite(pin_colI, LOW);
 
-  Keyboard.begin();
+  Keyboard.begin(); 
   
 } // End setup()
+
 
 //
 // loop()
 //
 void loop() {
+  // Simple debounce routine
   if  ((millis() - startTime) > debounceTime) {
       ScanKeys();
       startTime = millis();
@@ -132,7 +167,7 @@ void loop() {
   if (keysHaveChanged == true)
     WriteKeys();
 
-  // Mirror the status keymap into the history keymap
+  // Mirror the status key map into the history key map
   for (byte c = 0; c < columns; c++) {  
     for (byte r = 0; r < rows; r++) {
       keyMapHistory[r][c] = keyMapStatus[r][c];
@@ -152,8 +187,10 @@ void loop() {
 
 
 //
-// MuxColumn()
-// Sets the column 4051 selector
+// MuxColumn(int col)
+// Sets the column CD4051 selector
+//
+// int col = column number to select
 //
 void MuxColumn(int col) {
   digitalWrite(pin_colA0, bitRead(col, 0));
@@ -161,9 +198,12 @@ void MuxColumn(int col) {
   digitalWrite(pin_colA2, bitRead(col, 2));
 }
 
+
 //
-// MuxRow()
-// Sets the row 4051 selector
+// MuxRow(int row)
+// Sets the row CD4051 selector
+//
+// int row = row number to select
 //
 void MuxRow(int row) {
   digitalWrite(pin_rowA0, bitRead(row, 0));
@@ -171,16 +211,17 @@ void MuxRow(int row) {
   digitalWrite(pin_rowA2, bitRead(row, 2));
 }
 
+
 //
 // ScanKeys()
 // Scans the keyboard matrix
 //
 void ScanKeys() {
     // Make sure columns are running LOW
-    digitalWrite(pin_colI, LOW);
-    digitalWrite(pin_colZ, LOW);
+    //digitalWrite(pin_colI, LOW);
+    //digitalWrite(pin_colZ, LOW);
       
-    // Start working through the rows and columns
+    // Start working through the rows and columns and fill the status matrix
     for (byte c = 0; c < columns; c++) {  
       MuxColumn(c);
   
@@ -194,6 +235,7 @@ void ScanKeys() {
           keyMapStatus[r][c] = false;
         }
 
+        // Compare the current key matrix to the matrix on the last loop, determine if keys have changed
         if (keyMapStatus[r][c] != keyMapHistory[r][c])
           keysHaveChanged = true;
 
@@ -207,7 +249,15 @@ void ScanKeys() {
       statusRestore = false;
     }
 
-    if (historyRestore != statusRestore)
+    // Read SHIFTLOCK status
+    if (digitalRead(pin_shiftLock) == LOW) {
+      statusShiftlock = true;
+    } else {
+      statusShiftlock = false;
+    }
+
+    // Compare RESTORE and SHIFTLOCK status, determine if keys have changed.
+    if (historyRestore != statusRestore || historyShiftlock != statusShiftlock)
       keysHaveChanged = true;
 }
 
@@ -219,9 +269,9 @@ void WriteKeys() {
   for (byte c = 0; c < columns; c++){
     for (byte r = 0; r < rows; r++) {
       if (keyMapStatus[r][c] == true && keyMapHistory[r][c] == false) {
-        Keyboard.press(keyMapUnmodified[c][r]);
+        Keyboard.press(keyMapUnmodified[c][r]); // column and row need to reversed. Sure I'm derping on something here, but it works
       } else if (keyMapStatus[r][c] == false && keyMapHistory[r][c] == true) {
-        Keyboard.release(keyMapUnmodified[c][r]);
+        Keyboard.release(keyMapUnmodified[c][r]); // column and row need to reversed. Sure I'm derping on something here, but it works
       }
     } // endfor ROWS
   } // endfor COLUMNS
@@ -232,7 +282,31 @@ void WriteKeys() {
   } else if (statusRestore == false && historyRestore == true) {
     Keyboard.release(178);
   }
+
+  // Process the SHIFTLOCK key, use .write() since the key physically locks in place
+  if (statusShiftlock == true && historyShiftlock == false) {
+    Keyboard.write(193);
+  } else if (statusShiftlock == false && historyShiftlock ==true) {
+    Keyboard.write(193);
+  }
 }
+
+
+// 
+// SetLED(String requestedStatus)
+// Sets the color the RGB LED (if enabled)
+//
+// int requestedStatus = name of the status we want to indicate
+//
+void SetLED(int requestedStatus) {
+  // Only run if RGB LED is enabled in the setup parameters
+  //if (RGBenabled) {
+    //switch (requestedStatus) {
+     // case 
+   // }
+  //}
+}
+
 
 //
 // DebugKeys()
