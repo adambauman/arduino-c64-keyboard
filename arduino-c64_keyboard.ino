@@ -300,11 +300,32 @@ void WriteKeys() {
 //
 void SetLED(int requestedStatus) {
   // Only run if RGB LED is enabled in the setup parameters
-  //if (RGBenabled) {
-    //switch (requestedStatus) {
-     // case 
-   // }
-  //}
+  if (RGBenabled) {
+    switch (requestedStatus) {
+      case 0: // Normal (red)
+        analogWrite(pin_rgbR, 255);
+        analogWrite(pin_rgbG, 0);
+        analogWrite(pin_rgbB, 0);
+        break;
+      case 1: // Capslock Enabled (blue)
+        analogWrite(pin_rgbR, 0);
+        analogWrite(pin_rgbG, 0);
+        analogWrite(pin_rgbB, 255);
+        break;
+      case 2: // Battery Good (green)
+        analogWrite(pin_rgbR, 0);
+        analogWrite(pin_rgbG, 255);
+        analogWrite(pin_rgbB, 0);
+        break;
+      case 3: // Battery Warning (yellow)
+        analogWrite(pin_rgbR, 255);
+        analogWrite(pin_rgbG, 255);
+        analogWrite(pin_rgbB, 0);
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 
