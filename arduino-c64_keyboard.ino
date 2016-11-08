@@ -1,11 +1,28 @@
 // BauTek C64 PiCase Keyboard Controller
+// Version 0.4, August 2016
+// Written by Adam Bauman (adam@kungfutreachery.net, https://bitbucket.org/adambauman/arduino-c64_keyboard)
 //
 // Utilizes an ATmega32U4-based microcontroller and two CD4051 muxers to run a Commodore64
-// keyboard as a USBHID device. 
+// keyboard as a USBHID device. Optionally you can also run a RGB status LED and alternate keymaps.
 //
 // See included wiring diagrams for hardware setup. The C64 keyboard requires one minor modification, you must
 // de-solder the leads on the SHIFTLOCK key and run one to the microcontroller ground, the other to pin 9.
 //
+//
+// Copyright (C) 2016, Adam J. Bauman
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//   GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //#include <Keyboard.h>
 
