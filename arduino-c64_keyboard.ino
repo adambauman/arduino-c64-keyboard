@@ -48,6 +48,7 @@ struct {
   boolean state_restore = false;
   boolean state_shift_lock = false;
 
+  
   boolean state_map[8][8] = {
     {false,false,false,false,false,false,false,false},
     {false,false,false,false,false,false,false,false},

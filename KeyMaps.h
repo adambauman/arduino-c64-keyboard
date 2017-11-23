@@ -8,25 +8,25 @@
 struct {
   // Matrix of un-modified keycodes
   byte unmodified[8][8] = {
-    { 49,  96, 128, 177,  32, 130, 113,  50},
-    { 51, 119,  97, 129, 122, 115, 101,  52},
-    { 55, 121, 103, 118,  98, 104, 117,  56},
-    { 53, 114, 100, 120,  99, 102, 116,  54},
-    { 57, 105, 106, 110, 109, 107, 111,  48},
-    { 43, 112, 108,  44,  46,  58,  64,  45},
-    { 36,  42,  59,  47, 133,  61,  94, 179},
-    {212, 176, 215, 217, 194, 196, 198, 200}
+    { KEYDEC_1,    KEYDEC_GRAV, KEYDEC_LCTR, KEYDEC_ESC,  KEYDEC_SPC,  KEYDEC_LALT, KEYDEC_Q,    KEYDEC_2 },
+    { KEYDEC_3,    KEYDEC_W,    KEYDEC_A,    KEYDEC_LSHI, KEYDEC_Z,    KEYDEC_S,    KEYDEC_E,    KEYDEC_4 },
+    { KEYDEC_7,    KEYDEC_Y,    KEYDEC_G,    KEYDEC_V,    KEYDEC_B,    KEYDEC_H,    KEYDEC_U,    KEYDEC_8 },
+    { KEYDEC_5,    KEYDEC_R,    KEYDEC_D,    KEYDEC_X,    KEYDEC_C,    KEYDEC_F,    KEYDEC_T,    KEYDEC_6 },
+    { KEYDEC_9,    KEYDEC_I,    KEYDEC_J,    KEYDEC_N,    KEYDEC_M,    KEYDEC_K,    KEYDEC_O,    KEYDEC_0 },
+    { KEYDEC_PLUS, KEYDEC_P,    KEYDEC_L,    KEYDEC_COMA, KEYDEC_PRCT, KEYDEC_COLN, KEYDEC_AT,   KEYDEC_MINU },
+    { KEYDEC_DOLR, KEYDEC_ASTR, KEYDEC_SCOL, KEYDEC_FSLA, KEYDEC_RSHI, KEYDEC_EQAL, KEYDEC_CART, KEYDEC_TAB },
+    { KEYDEC_DEL,  KEYDEC_ENT,  KEYDEC_RHT,  KEYDEC_DWN,  KEYDEC_F1,   KEYDEC_F3,   KEYDEC_F5,   KEYDEC_F7 }
   };
 
   // Matrix of SHIFT modified keycodes
   byte shifted[8][8] = {
-    { 33, 126,   0,   0,   0,   0,   0,  34},
-    { 35,   0,   0,   0,   0,   0,   0,  36},
-    { 37,   0,   0,   0,   0,   0,   0,  38},
-    { 39,   0,   0,   0,   0, 104,   0,  40},
-    { 41,   0,   0,   0,   0,   0,   0,  94},
-    {  0,   0,   0,  60,  62,  91,   0,  95},
-    {  0,   0,  92,  63,   0,   0, 214, 210}
+    { KEYDEC_EXCL, KEYDEC_TILD, 0,           0,           0,           0,           0,          KEYDEC_DQUT },
+    { KEYDEC_HASH, 0,           0,           0,           0,           0,           0,          KEYDEC_DOLR },
+    { 37,          0,           0,           0,           0,           0,           0,          KEYDEC_AMPR },
+    { KEYDEC_SQUT, 0,           0,           0,           0,           KEYDEC_H,    0,          KEYDEC_LPAR },
+    { KEYDEC_RPAR, 0,           0,           0,           0,           0,           0,          KEYDEC_CART },
+    {  0,          0,           0,           60,          KEYDEC_LSTH, KEYDEC_LBRA, 0,          KEYDEC_UNDR },
+    {  0,          0,           KEYDEC_BSLA, KEYDEC_QUES, 0,           0,           KEYDEC_PDN, KEYDEC_HOM}
   };
 
   byte restore_key = KEYDEC_BSP;
