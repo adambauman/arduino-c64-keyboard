@@ -25,63 +25,52 @@
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Keyboard.h>
-#include "KeyDefines.h"
 #include "KeyMaps.h"
 #include "Configuration.h"
 
 // Size of the keyboard matrix. C64 is technically 9x9 but the RESTORE key lives on its own and is handled seperatly
-typedef struct {
+struct {
   const byte rows = 8;
   const byte columns = 8;
-} key_matrix;
+} g_key_matrix;
 
-// Set if matrix is changed, stops loop from writing unnecessary key commands
-boolean key_have_changed = false;
+struct {
+  // Set if matrix is changed, stops loop from writing unnecessary key commands
+  boolean keys_have_changed = false;
+  // Tracks state of modifier keys (currently unused, running custom OS keymaps instead)
+  boolean state_shift = false;
+  boolean state_alt = false;
+  boolean state_ctrl = false;
+  boolean state_caps_lock = false;
+  // Tracks RESTORE and SHIFTLOCK parameters
+  boolean last_state_restore = false;
+  boolean last_state_shift_lock = false;
+  boolean state_restore = false;
+  boolean state_shift_lock = false;
 
-// Tracks state of modifier keys (currently unused, running custom OS keymaps instead)
-boolean shiftState = false;
-boolean altState = false;
-boolean ctrlState = false;
-boolean capsLockState = false;
+  boolean state_map[8][8] = {
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false}
+  };
 
-// Tracks RESTORE and SHIFTLOCK parameters
-boolean historyRestore = false;
-boolean historyShiftlock = false;
-boolean statusRestore = false;
-boolean statusShiftlock = false;
+  boolean last_state_map[8][8] = {
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false},
+    {false,false,false,false,false,false,false,false}
+  };
+} g_key_states;
 
-// Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
-unsigned long startTime = 0;
-unsigned int debounceTime = 10;
-  
-// Matrix of key status during a single scan loop
-boolean keyMapStatus[8][8] = {
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false}
-};
-
-// Matrix of key status during the last scan loop, compared to determine if keys have changed
-boolean keyMapHistory[8][8] = {
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false},
-  {false,false,false,false,false,false,false,false}
-};
-
-
-//
-// setup()
-//
 void setup() {
   if (SystemOptions::debugEnabled == true)
     Serial.begin(115200);
@@ -108,159 +97,107 @@ void setup() {
 
   Keyboard.begin(); 
   
-} // End setup()
-
-
-//
-// loop()
-//
+}
 void loop() {
-  // Simple debounce routine
-  if  ((millis() - startTime) > debounceTime) {
+  unsigned long start_time = 0;
+  if  ((millis() - start_time) > SystemOptions::debounce_time) {
       ScanKeys();
-      startTime = millis();
+      start_time = millis();
   }
 
-  // Fire off the keys if key status have changed
-  if (key_have_changed == true)
-    WriteKeys();
-
-  // Mirror the status key map into the history key map
-  for (byte c = 0; c < key_matrix.columns; c++) {  
-    for (byte r = 0; r < key_matrix.rows; r++) {
-      keyMapHistory[r][c] = keyMapStatus[r][c];
+  g_key_states.last_state_restore = g_key_states.state_restore;
+  for (byte column = 0; column < g_key_matrix.columns; column++) {  
+    for (byte row = 0; row < g_key_matrix.rows; row++) {
+      g_key_states.last_state_map[row][column] = g_key_states.state_map[row][column];
     }
   }
-
-  // Mirror the status of the special keys
-  historyRestore = statusRestore;
-
-  if (SystemOptions::debugEnabled == true && key_have_changed == true)
-    DebugKeys();
-
-  // Reset tracking variables, go for another loop
-  key_have_changed = false;
-    
-} // End loop()
-
-
-//
-// MuxColumn(int col)
-// Sets the column CD4051 selector
-//
-// int col = column number to select
-//
-void MuxColumn(int col) {
-  digitalWrite(PIN_COL_A0, bitRead(col, 0));
-  digitalWrite(PIN_COL_A1, bitRead(col, 1));
-  digitalWrite(PIN_COL_A2, bitRead(col, 2));
+  
+  if (g_key_states.keys_have_changed) { WriteKeys(); }
+  if (SystemOptions::debugEnabled && g_key_states.keys_have_changed) { DebugKeys(); } 
+  g_key_states.keys_have_changed = false;
 }
 
+void MuxCD4051Column(int column) {
+  digitalWrite(PIN_COL_A0, bitRead(column, 0));
+  digitalWrite(PIN_COL_A1, bitRead(column, 1));
+  digitalWrite(PIN_COL_A2, bitRead(column, 2));
+}
 
-//
-// MuxRow(int row)
-// Sets the row CD4051 selector
-//
-// int row = row number to select
-//
-void MuxRow(int row) {
+void MuxCD4051Row(int row) {
   digitalWrite(PIN_ROW_A0, bitRead(row, 0));
   digitalWrite(PIN_ROW_A1, bitRead(row, 1));
   digitalWrite(PIN_ROW_A2, bitRead(row, 2));
 }
 
-
-//
-// ScanKeys()
-// Scans the keyboard matrix
-//
 void ScanKeys() {
     // Make sure columns are running LOW
     //digitalWrite(pin_colI, LOW);
     //digitalWrite(pin_colZ, LOW);
-      
-    // Start working through the rows and columns and fill the status matrix
-    for (byte c = 0; c < columns; c++) {  
-      MuxColumn(c);
-  
-      for (byte r = 0; r < rows; r++) {
-        MuxRow(r);
+    for (byte column = 0; column < g_key_matrix.columns; column++) {  
+      MuxCD4051Column(column);
+      for (byte row = 0; row < g_key_matrix.rows; row++) {
+        MuxCD4051Row(row);
 
-        // Row reads TRUE if low
-        if (digitalRead(PIN_ROW_Z) == LOW) {
-          keyMapStatus[r][c] = true;
+        if (LOW == digitalRead(PIN_ROW_Z)) { 
+          g_key_states.state_map[row][column] = true;
         } else {
-          keyMapStatus[r][c] = false;
+          g_key_states.state_map[row][column] = false;
         }
-
-        // Compare the current key matrix to the matrix on the last loop, determine if keys have changed
-        if (keyMapStatus[r][c] != keyMapHistory[r][c])
-          key_have_changed = true;
-
-      } // endfor ROWS
-    } // endfor COLUMNS
+        
+        if (g_key_states.last_state_map[row][column] != g_key_states.state_map[row][column]) { g_key_states.keys_have_changed = true; }
+      }
+    }
 
     // Read RESTORE status
-    if (digitalRead(PIN_ROW_8) == LOW) {
-      statusRestore = true;
+    if (LOW == digitalRead(PIN_ROW_8)) { 
+      g_key_states.state_restore = true; 
     } else {
-      statusRestore = false;
+      g_key_states.state_restore = false;
     }
 
     // Read SHIFTLOCK status
-    if (digitalRead(PIN_SHIFT_LOCK) == LOW) {
-      statusShiftlock = true;
+    if (LOW == digitalRead(PIN_SHIFT_LOCK)) {
+      g_key_states.state_shift_lock = true;
     } else {
-      statusShiftlock = false;
+      g_key_states.state_shift_lock = false;
     }
 
-    // Compare RESTORE and SHIFTLOCK status, determine if keys have changed.
-    if (historyRestore != statusRestore || historyShiftlock != statusShiftlock)
-      key_have_changed = true;
+    if (g_key_states.last_state_restore != g_key_states.state_restore || g_key_states.last_state_shift_lock != g_key_states.state_shift_lock) { 
+      g_key_states.keys_have_changed = true;
+    }
 }
 
-//
-// WriteKeys()
-// Writes the keys out through USBHID
 void WriteKeys()
 {
-  // Start with the key maps
-  for (byte c = 0; c < columns; c++){
-    for (byte r = 0; r < rows; r++) {
-      if (keyMapStatus[r][c] == true && keyMapHistory[r][c] == false) {
-        Keyboard.press(keyMapUnmodified[c][r]); // column and row need to reversed. Sure I'm derping on something here, but it works
-      } else if (keyMapStatus[r][c] == false && keyMapHistory[r][c] == true) {
-        Keyboard.release(keyMapUnmodified[c][r]); // column and row need to reversed. Sure I'm derping on something here, but it works
+  for (byte column = 0; column < g_key_matrix.columns; column++){
+    for (byte row = 0; row < g_key_matrix.rows; row++) {
+      if (g_key_states.state_map[row][column] && !g_key_states.last_state_map[row][column]) {
+        //TODO: figure out why row and column need to be reversed here
+        Keyboard.press(key_maps.unmodified[column][row]); 
+      } else if (!g_key_states.state_map[row][column] && g_key_states.last_state_map[row][column]) {
+        Keyboard.release(key_maps.unmodified[column][row]);
       }
-    } // endfor ROWS
-  } // endfor COLUMNS
+    }
+  }
 
-  // Process the RESTORE key
-  if (statusRestore == true && historyRestore == false) {
-    Keyboard.press(178);
-  } else if (statusRestore == false && historyRestore == true) {
-    Keyboard.release(178);
+  if (g_key_states.state_restore && !g_key_states.last_state_restore) {
+    Keyboard.press(key_maps.restore_key);
+  } else if (!g_key_states.state_restore && g_key_states.last_state_restore) {
+    Keyboard.release(key_maps.restore_key);
   }
 
   // Process the SHIFTLOCK key, use .write() since the key physically locks in place
-  if (statusShiftlock == true && historyShiftlock == false) {
+  if (g_key_states.state_shift_lock && !g_key_states.last_state_map) {
     Keyboard.write(193);
-  } else if (statusShiftlock == false && historyShiftlock ==true) {
+  } else if (!g_key_states.state_shift_lock && g_key_states.last_state_shift_lock) {
     Keyboard.write(193);
   }
 }
 
-
-// 
-// SetLED(String requestedStatus)
-// Sets the color the RGB LED (if enabled)
-//
-// int requestedStatus = name of the status we want to indicate
-//
-void SetLED(int requestedStatus) {
+void SetLED(int requested_status) {
   // Only run if RGB LED is enabled in the setup parameters
   if (SystemOptions::RGBenabled) {
-    switch (requestedStatus) {
+    switch (requested_status) {
       case 0: // Normal (red)
         analogWrite(PIN_RGB_R, 255);
         analogWrite(PIN_RGB_G, 0);
@@ -287,22 +224,17 @@ void SetLED(int requestedStatus) {
   }
 }
 
-
-//
-// DebugKeys()
-// Dumps debug information to the serial console
-//
 void DebugKeys() {
-  int shouldSend = 0;
+  int should_send = 0;
   
   Serial.println("");
-  for (byte c = 0; c < columns; c++) {  
-    for (byte r = 0; r < rows; r++) {
-      Serial.print(keyMapHistory[r][c]);
+  for (byte column = 0; column < g_key_matrix.columns; column++) {  
+    for (byte row = 0; row < g_key_matrix.rows; row++) {
+      Serial.print(g_key_states.last_state_map[row][column]);
       Serial.print(", ");
 
-      if (keyMapHistory[r][c] == true)
-        shouldSend = keyMapUnmodified[r][c]; 
+      if (g_key_states.last_state_map[row][column])
+        should_send = key_maps.unmodified[row][column]; 
     }
     Serial.println("");
   }
@@ -310,15 +242,15 @@ void DebugKeys() {
   Serial.println("");
   Serial.println("KeymapUnmodified: ");
 
-  for (byte c = 0; c < columns; c++) {
-    for (byte r = 0; r < rows; r++) {
-      Serial.print(keyMapUnmodified[r][c]);
+  for (byte column = 0; column < g_key_matrix.columns; column++) {
+    for (byte row = 0; row < g_key_matrix.rows; row++) {
+      Serial.print(key_maps.unmodified[row][column]);
       Serial.print(", ");
     }
     Serial.println("");
   }
   
   Serial.print("Should send: ");
-  Serial.println(shouldSend);
+  Serial.println(should_send);
   Serial.println("");
 }

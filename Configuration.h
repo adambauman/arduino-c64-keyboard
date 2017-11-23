@@ -4,13 +4,12 @@
 namespace SystemOptions {
     // Set TRUE to enable serial debugging
     boolean debugEnabled = true;
-
     // Set TRUE to enable the RGB LED
     boolean RGBenabled = true;
-
     // Set TRUE to enable battery level reading
     boolean batteryEnabled = true;
-    // END SETUP PARAMETERS
+    // Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
+    unsigned int debounce_time = 10;
 };
 
 // RESTORE lives outside the muxed matrix, sends BACKSPACE
