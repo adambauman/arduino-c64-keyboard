@@ -11,18 +11,18 @@
 //
 // Copyright (C) 2016, Adam J. Bauman
 //
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Keyboard.h>
 #include "KeyMaps.h"
@@ -48,7 +48,7 @@ struct {
   boolean state_restore = false;
   boolean state_shift_lock = false;
 
-  
+
   boolean state_map[8][8] = {
     {false,false,false,false,false,false,false,false},
     {false,false,false,false,false,false,false,false},
@@ -118,16 +118,16 @@ void loop() {
   g_key_states.keys_have_changed = false;
 }
 
-void MuxCD4051Column(int column) {
-  digitalWrite(PIN_COL_A0, bitRead(column, 0));
-  digitalWrite(PIN_COL_A1, bitRead(column, 1));
-  digitalWrite(PIN_COL_A2, bitRead(column, 2));
+void ColumnCD4051Select(int column) {
+  digitalWrite(Pins::CD4051::Column::a0, bitRead(column, 0));
+  digitalWrite(Pins::CD4051::Column::a1, bitRead(column, 1));
+  digitalWrite(Pins::CD4051::Column::a2, bitRead(column, 2));
 }
 
-void MuxCD4051Row(int row) {
-  digitalWrite(PIN_ROW_A0, bitRead(row, 0));
-  digitalWrite(PIN_ROW_A1, bitRead(row, 1));
-  digitalWrite(PIN_ROW_A2, bitRead(row, 2));
+void RowCD4015Select(int row) {
+  digitalWrite(Pins::CD4051::Row::a0, bitRead(row, 0));
+  digitalWrite(Pins::CD4051::Row::a1, bitRead(row, 1));
+  digitalWrite(Pins::CD4051::Row::a2, bitRead(row, 2));
 }
 
 void ScanKeys() {
@@ -135,11 +135,11 @@ void ScanKeys() {
     //digitalWrite(pin_colI, LOW);
     //digitalWrite(pin_colZ, LOW);
     for (byte column = 0; column < g_key_matrix.columns; column++) {  
-      MuxCD4051Column(column);
+      ColumnCD4051Select(column);
       for (byte row = 0; row < g_key_matrix.rows; row++) {
-        MuxCD4051Row(row);
+        RowCD4015Select(row);
 
-        if (LOW == digitalRead(PIN_ROW_Z)) { 
+        if (LOW == digitalRead(Pins::CD4051::Row::common_io)) { 
           g_key_states.state_map[row][column] = true;
         } else {
           g_key_states.state_map[row][column] = false;
@@ -150,14 +150,14 @@ void ScanKeys() {
     }
 
     // Read RESTORE status
-    if (LOW == digitalRead(PIN_ROW_8)) { 
+    if (LOW == digitalRead(Pins::row_8)) { 
       g_key_states.state_restore = true; 
     } else {
       g_key_states.state_restore = false;
     }
 
     // Read SHIFTLOCK status
-    if (LOW == digitalRead(PIN_SHIFT_LOCK)) {
+    if (LOW == digitalRead(Pins::shift_lock)) {
       g_key_states.state_shift_lock = true;
     } else {
       g_key_states.state_shift_lock = false;
@@ -200,24 +200,24 @@ void SetLED(int requested_status) {
   if (SystemOptions::RGBenabled) {
     switch (requested_status) {
       case 0: // Normal (red)
-        analogWrite(PIN_RGB_R, 255);
-        analogWrite(PIN_RGB_G, 0);
-        analogWrite(PIN_RGB_B, 0);
+        analogWrite(Pins::RGB::red, 255);
+        analogWrite(Pins::RGB::green, 0);
+        analogWrite(Pins::RGB::blue, 0);
         break;
       case 1: // Capslock Enabled (blue)
-        analogWrite(PIN_RGB_R, 0);
-        analogWrite(PIN_RGB_G, 0);
-        analogWrite(PIN_RGB_B, 255);
+        analogWrite(Pins::RGB::red, 0);
+        analogWrite(Pins::RGB::green, 0);
+        analogWrite(Pins::RGB::blue, 255);
         break;
       case 2: // Battery Good (green)
-        analogWrite(PIN_RGB_R, 0);
-        analogWrite(PIN_RGB_G, 255);
-        analogWrite(PIN_RGB_B, 0);
+        analogWrite(Pins::RGB::red, 0);
+        analogWrite(Pins::RGB::green, 255);
+        analogWrite(Pins::RGB::blue, 0);
         break;
       case 3: // Battery Warning (yellow)
-        analogWrite(PIN_RGB_R, 255);
-        analogWrite(PIN_RGB_G, 255);
-        analogWrite(PIN_RGB_B, 0);
+        analogWrite(Pins::RGB::red, 255);
+        analogWrite(Pins::RGB::green, 255);
+        analogWrite(Pins::RGB::blue, 0);
         break;
       default:
         break;
