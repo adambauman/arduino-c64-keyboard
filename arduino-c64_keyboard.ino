@@ -73,32 +73,25 @@ struct {
 } g_key_states;
 
 void setup() {
-  if (SystemOptions::debugEnabled == true)
-    Serial.begin(115200);
-
-  // All key reading pins use the internal pullup resistors
-  pinMode(PIN_SHIFT_LOCK, INPUT_PULLUP);
-
-  pinMode(PIN_COL_I, OUTPUT);
-  pinMode(PIN_ROW_8, INPUT_PULLUP);
-  
-  pinMode(PIN_COL_Z, OUTPUT);
-  pinMode(PIN_COL_A0, OUTPUT);
-  pinMode(PIN_COL_A1, OUTPUT);
-  pinMode(PIN_COL_A2, OUTPUT);
-  
-  pinMode(PIN_ROW_Z, INPUT_PULLUP); 
-  pinMode(PIN_ROW_A0, OUTPUT);
-  pinMode(PIN_ROW_A1, OUTPUT);
-  pinMode(PIN_ROW_A2, OUTPUT);
-
-  // Row drops low when button closed to column. Drop columns LOW so they're ready.
-  digitalWrite(PIN_COL_Z, LOW);
-  digitalWrite(PIN_COL_I, LOW);
-
+  if (SystemOptions::debugEnabled) { Serial.begin(115200); }
   Keyboard.begin(); 
-  
+
+  pinMode(Pins::shift_lock, INPUT_PULLUP);
+  pinMode(Pins::column_i, OUTPUT);
+  pinMode(Pins::row_8, INPUT_PULLUP);
+  pinMode(Pins::CD4051::Column::common_io, OUTPUT);
+  pinMode(Pins::CD4051::Column::a0, OUTPUT);
+  pinMode(Pins::CD4051::Column::a1, OUTPUT);
+  pinMode(Pins::CD4051::Column::a2, OUTPUT);
+  pinMode(Pins::CD4051::Row::common_io, INPUT_PULLUP); 
+  pinMode(Pins::CD4051::Row::a0, OUTPUT);
+  pinMode(Pins::CD4051::Row::a1, OUTPUT);
+  pinMode(Pins::CD4051::Row::a2, OUTPUT);
+  // Row drops LOW when button closed to column. Drop columns LOW so they're ready.
+  digitalWrite(Pins::CD4051::Column::common_io, LOW);
+  digitalWrite(Pins::column_i, LOW);
 }
+
 void loop() {
   unsigned long start_time = 0;
   if  ((millis() - start_time) > SystemOptions::debounce_time) {
@@ -107,8 +100,8 @@ void loop() {
   }
 
   g_key_states.last_state_restore = g_key_states.state_restore;
-  for (byte column = 0; column < g_key_matrix.columns; column++) {  
-    for (byte row = 0; row < g_key_matrix.rows; row++) {
+  for (byte column = 0; g_key_matrix.columns < column; column++) {  
+    for (byte row = 0; g_key_matrix.rows > row; row++) {
       g_key_states.last_state_map[row][column] = g_key_states.state_map[row][column];
     }
   }
@@ -134,44 +127,42 @@ void ScanKeys() {
     // Make sure columns are running LOW
     //digitalWrite(pin_colI, LOW);
     //digitalWrite(pin_colZ, LOW);
-    for (byte column = 0; column < g_key_matrix.columns; column++) {  
+    g_key_states.keys_have_changed = false;
+    for (byte column = 0; g_key_matrix.columns > column; column++) {  
       ColumnCD4051Select(column);
-      for (byte row = 0; row < g_key_matrix.rows; row++) {
+      for (byte row = 0; g_key_matrix.rows > row; row++) {
         RowCD4015Select(row);
-
-        if (LOW == digitalRead(Pins::CD4051::Row::common_io)) { 
-          g_key_states.state_map[row][column] = true;
-        } else {
-          g_key_states.state_map[row][column] = false;
-        }
-        
+        g_key_states.state_map[row][column] = !digitalRead(Pins::CD4051::Row::common_io); // true on LOW
+        // if (LOW == digitalRead(Pins::CD4051::Row::common_io)) { 
+        //   g_key_states.state_map[row][column] = true;
+        // } else {
+        //   g_key_states.state_map[row][column] = false;
+        // }
         if (g_key_states.last_state_map[row][column] != g_key_states.state_map[row][column]) { g_key_states.keys_have_changed = true; }
       }
     }
 
-    // Read RESTORE status
-    if (LOW == digitalRead(Pins::row_8)) { 
-      g_key_states.state_restore = true; 
-    } else {
-      g_key_states.state_restore = false;
-    }
-
+    g_key_states.state_restore = !digitalRead(Pins::row_8); // true on LOW
+    g_key_states.state_shift_lock = !digitalRead(Pins::shift_lock); // true on LOW
+    // if (LOW == digitalRead(Pins::row_8)) { 
+    //   g_key_states.state_restore = true; 
+    // } else {
+    //   g_key_states.state_restore = false;
+    // }
     // Read SHIFTLOCK status
-    if (LOW == digitalRead(Pins::shift_lock)) {
-      g_key_states.state_shift_lock = true;
-    } else {
-      g_key_states.state_shift_lock = false;
-    }
-
-    if (g_key_states.last_state_restore != g_key_states.state_restore || g_key_states.last_state_shift_lock != g_key_states.state_shift_lock) { 
-      g_key_states.keys_have_changed = true;
-    }
+    // if (LOW == digitalRead(Pins::shift_lock)) {
+    //   g_key_states.state_shift_lock = true;
+    // } else {
+    //   g_key_states.state_shift_lock = false;
+    // }
+    if (g_key_states.last_state_restore != g_key_states.state_restore) { g_key_states.keys_have_changed = true; }
+    if (g_key_states.last_state_shift_lock != g_key_states.state_shift_lock) { g_key_states.keys_have_changed = true; }
 }
 
 void WriteKeys()
 {
-  for (byte column = 0; column < g_key_matrix.columns; column++){
-    for (byte row = 0; row < g_key_matrix.rows; row++) {
+  for (byte column = 0; g_key_matrix.columns > column; column++){
+    for (byte row = 0; g_key_matrix.rows > row; row++) {
       if (g_key_states.state_map[row][column] && !g_key_states.last_state_map[row][column]) {
         //TODO: figure out why row and column need to be reversed here
         Keyboard.press(key_maps.unmodified[column][row]); 
@@ -189,9 +180,9 @@ void WriteKeys()
 
   // Process the SHIFTLOCK key, use .write() since the key physically locks in place
   if (g_key_states.state_shift_lock && !g_key_states.last_state_map) {
-    Keyboard.write(193);
+    Keyboard.write(KEYDEC_CLOK);
   } else if (!g_key_states.state_shift_lock && g_key_states.last_state_shift_lock) {
-    Keyboard.write(193);
+    Keyboard.write(KEYDEC_CLOK);
   }
 }
 
@@ -226,16 +217,16 @@ void SetLED(int requested_status) {
 }
 
 void DebugKeys() {
-  int should_send = 0;
+  int selected_key = 0;
   
   Serial.println("");
-  for (byte column = 0; column < g_key_matrix.columns; column++) {  
-    for (byte row = 0; row < g_key_matrix.rows; row++) {
+  for (byte column = 0; g_key_matrix.columns > column; column++) {  
+    for (byte row = 0; g_key_matrix.rows > row; row++) {
       Serial.print(g_key_states.last_state_map[row][column]);
       Serial.print(", ");
 
       if (g_key_states.last_state_map[row][column])
-        should_send = key_maps.unmodified[row][column]; 
+        selected_key = key_maps.unmodified[row][column]; 
     }
     Serial.println("");
   }
@@ -243,8 +234,8 @@ void DebugKeys() {
   Serial.println("");
   Serial.println("KeymapUnmodified: ");
 
-  for (byte column = 0; column < g_key_matrix.columns; column++) {
-    for (byte row = 0; row < g_key_matrix.rows; row++) {
+  for (byte column = 0; g_key_matrix.columns > column; column++) {
+    for (byte row = 0; g_key_matrix.rows > row; row++) {
       Serial.print(key_maps.unmodified[row][column]);
       Serial.print(", ");
     }
@@ -252,6 +243,6 @@ void DebugKeys() {
   }
   
   Serial.print("Should send: ");
-  Serial.println(should_send);
+  Serial.println(selected_key);
   Serial.println("");
 }
