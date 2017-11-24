@@ -1,7 +1,7 @@
 #ifndef LIGHTING_H
 #define LIGHTING_H
 
-struct RGBLED{
+struct RgbLed{
     int pin_red;
     int pin_green;
     int pin_blue;
@@ -12,7 +12,10 @@ struct RGBLED{
 
 class Lighting {
     public:
-    SetRGBLED(int red, int green, int blue);
+    void ChangeColor(RgbLed &rgb_led);
+    // Disable all lights
+    // Enable all lights
+    // Pulse and animation functions
 };
 
 #endif
