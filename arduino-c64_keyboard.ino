@@ -32,7 +32,7 @@
 struct {
   const byte rows = 8;
   const byte columns = 8;
-} g_key_matrix;
+} g_key_matrix_size;
 
 struct {
   // Set if matrix is changed, stops loop from writing unnecessary key commands
@@ -47,7 +47,6 @@ struct {
   boolean last_state_shift_lock = false;
   boolean state_restore = false;
   boolean state_shift_lock = false;
-
 
   boolean state_map[8][8] = {
     {false,false,false,false,false,false,false,false},
@@ -100,8 +99,8 @@ void loop() {
   }
 
   g_key_states.last_state_restore = g_key_states.state_restore;
-  for (byte column = 0; g_key_matrix.columns < column; column++) {  
-    for (byte row = 0; g_key_matrix.rows > row; row++) {
+  for (byte column = 0; g_key_matrix_size.columns < column; column++) {  
+    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
       g_key_states.last_state_map[row][column] = g_key_states.state_map[row][column];
     }
   }
@@ -128,9 +127,9 @@ void ScanKeys() {
     //digitalWrite(pin_colI, LOW);
     //digitalWrite(pin_colZ, LOW);
     g_key_states.keys_have_changed = false;
-    for (byte column = 0; g_key_matrix.columns > column; column++) {  
+    for (byte column = 0; g_key_matrix_size.columns > column; column++) {  
       ColumnCD4051Select(column);
-      for (byte row = 0; g_key_matrix.rows > row; row++) {
+      for (byte row = 0; g_key_matrix_size.rows > row; row++) {
         RowCD4015Select(row);
         g_key_states.state_map[row][column] = !digitalRead(Pins::CD4051::Row::common_io); // true on LOW
         // if (LOW == digitalRead(Pins::CD4051::Row::common_io)) { 
@@ -161,8 +160,8 @@ void ScanKeys() {
 
 void WriteKeys()
 {
-  for (byte column = 0; g_key_matrix.columns > column; column++){
-    for (byte row = 0; g_key_matrix.rows > row; row++) {
+  for (byte column = 0; g_key_matrix_size.columns > column; column++){
+    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
       if (g_key_states.state_map[row][column] && !g_key_states.last_state_map[row][column]) {
         //TODO: figure out why row and column need to be reversed here
         Keyboard.press(key_maps.unmodified[column][row]); 
@@ -220,8 +219,8 @@ void DebugKeys() {
   int selected_key = 0;
   
   Serial.println("");
-  for (byte column = 0; g_key_matrix.columns > column; column++) {  
-    for (byte row = 0; g_key_matrix.rows > row; row++) {
+  for (byte column = 0; g_key_matrix_size.columns > column; column++) {  
+    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
       Serial.print(g_key_states.last_state_map[row][column]);
       Serial.print(", ");
 
@@ -234,8 +233,8 @@ void DebugKeys() {
   Serial.println("");
   Serial.println("KeymapUnmodified: ");
 
-  for (byte column = 0; g_key_matrix.columns > column; column++) {
-    for (byte row = 0; g_key_matrix.rows > row; row++) {
+  for (byte column = 0; g_key_matrix_size.columns > column; column++) {
+    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
       Serial.print(key_maps.unmodified[row][column]);
       Serial.print(", ");
     }
