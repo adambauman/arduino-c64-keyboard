@@ -1,11 +1,13 @@
-#ifndef KEY_MAPS_H
-#define KEY_MAPS_H
+// C64KeyMaps.h
+
+#ifndef C64_KEY_MAPS_H
+#define C64_KEY_MAPS_H
 
 #ifndef KEY_DEFINES_H
 #include "KeyDefines.h"
 #endif
 
-struct {
+namespace C64KeyMaps {
   // Matrix of un-modified keycodes
   byte unmodified[8][8] = {
     { KEYDEC_1,    KEYDEC_GRAV, KEYDEC_LCTR, KEYDEC_ESC,  KEYDEC_SPC,  KEYDEC_LALT, KEYDEC_Q,    KEYDEC_2 },
@@ -30,6 +32,12 @@ struct {
   };
 
   byte restore_key = KEYDEC_BSP;
-} key_maps;
+
+  byte left_shift_position_row = 1;
+  byte left_shift_position_column = 3;
+  
+  byte right_shift_position_row = 6;
+  byte right_shift_position_column = 4;
+};
 
 #endif

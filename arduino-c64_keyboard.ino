@@ -25,7 +25,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Keyboard.h>
-#include "KeyMaps.h"
+#include "C64KeyMaps.h"
 #include "Configuration.h"
 
 // Size of the keyboard matrix. C64 is technically 9x9 but the RESTORE key lives on its own and is handled seperatly
@@ -156,6 +156,35 @@ void ScanKeys() {
     // }
     if (g_key_states.last_state_restore != g_key_states.state_restore) { g_key_states.keys_have_changed = true; }
     if (g_key_states.last_state_shift_lock != g_key_states.state_shift_lock) { g_key_states.keys_have_changed = true; }
+
+}
+
+bool IsShiftActive(){
+  bool shift_pressed = false;
+  bool left_shift_pressed = g_key_states.state_map[C64KeyMaps::left_shift_position_row][C64KeyMaps::left_shift_position_column];
+  bool right_shift_pressed = g_key_states.state_map[C64KeyMaps::right_shift_position_row][C64KeyMaps::right_shift_position_column];
+  if (left_shift_pressed || right_shift_pressed) { shift_pressed = true; }
+  return(shift_pressed);
+}
+
+void KeyPressAction(int row, int column)
+{
+  if (IsShiftActive()) {
+    //TODO: figure out why row and column need to be reversed here
+    Keyboard.press(C64KeyMaps::shifted[column][row]); 
+  } else {
+    Keyboard.press(C64KeyMaps::unmodified[column][row]); 
+  }
+}
+
+void KeyReleaseAction(int row, int column)
+{
+  if (IsShiftActive()) {
+    //TODO: figure out why row and column need to be reversed here
+    Keyboard.release(C64KeyMaps::shifted[column][row]); 
+  } else {
+    Keyboard.release(C64KeyMaps::unmodified[column][row]); 
+  }
 }
 
 void WriteKeys()
@@ -163,18 +192,17 @@ void WriteKeys()
   for (byte column = 0; g_key_matrix_size.columns > column; column++){
     for (byte row = 0; g_key_matrix_size.rows > row; row++) {
       if (g_key_states.state_map[row][column] && !g_key_states.last_state_map[row][column]) {
-        //TODO: figure out why row and column need to be reversed here
-        Keyboard.press(key_maps.unmodified[column][row]); 
+        KeyPressAction(row, column);
       } else if (!g_key_states.state_map[row][column] && g_key_states.last_state_map[row][column]) {
-        Keyboard.release(key_maps.unmodified[column][row]);
+        KeyReleaseAction(row, column);
       }
     }
   }
 
   if (g_key_states.state_restore && !g_key_states.last_state_restore) {
-    Keyboard.press(key_maps.restore_key);
+    Keyboard.press(C64KeyMaps::restore_key);
   } else if (!g_key_states.state_restore && g_key_states.last_state_restore) {
-    Keyboard.release(key_maps.restore_key);
+    Keyboard.release(C64KeyMaps::restore_key);
   }
 
   // Process the SHIFTLOCK key, use .write() since the key physically locks in place
@@ -225,7 +253,7 @@ void DebugKeys() {
       Serial.print(", ");
 
       if (g_key_states.last_state_map[row][column])
-        selected_key = key_maps.unmodified[row][column]; 
+        selected_key = C64KeyMaps::unmodified[row][column]; 
     }
     Serial.println("");
   }
@@ -235,7 +263,7 @@ void DebugKeys() {
 
   for (byte column = 0; g_key_matrix_size.columns > column; column++) {
     for (byte row = 0; g_key_matrix_size.rows > row; row++) {
-      Serial.print(key_maps.unmodified[row][column]);
+      Serial.print(C64KeyMaps::unmodified[row][column]);
       Serial.print(", ");
     }
     Serial.println("");
