@@ -15,6 +15,7 @@ class CD4051 {
         uint8_t m_pin_a1;
         uint8_t m_pin_a2;
         uint8_t m_pin_common_io;
+        uint8_t m_current_selection;
 };
 
 #endif

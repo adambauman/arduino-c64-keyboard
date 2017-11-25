@@ -1,15 +1,15 @@
 // BauTek C64 PiCase Keyboard Controller
-// Version 0.4, August 2016
+// Version 0.5, August 2017
 // Written by Adam Bauman (adam@kungfutreachery.net, https://bitbucket.org/adambauman/arduino-c64_keyboard)
 //
-// Utilizes an ATmega32U4-based microcontroller and two CD4051 muxers to run a Commodore64
+// Utilizes an ATmega32U4-based microcontroller and two CD4051 multiplexers to run a Commodore64
 // keyboard as a USBHID device. Optionally you can also run a RGB status LED and alternate keymaps.
 //
 // See included wiring diagrams for hardware setup. The C64 keyboard requires one minor modification, you must
 // de-solder the leads on the SHIFTLOCK key and run one to the microcontroller ground, the other to pin 9.
 //
 //
-// Copyright (C) 2016, Adam J. Bauman
+// Copyright (C) 2017, Adam J. Bauman
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,49 +29,7 @@
 #include "Configuration.h"
 #include "RgbLed.h"
 #include "CD4051.h"
-
-// Size of the keyboard matrix. C64 is technically 9x9 but the RESTORE key lives on its own and is handled seperatly
-struct {
-  const byte rows = 8;
-  const byte columns = 8;
-} g_key_matrix_size;
-
-struct {
-  // Set if matrix is changed, stops loop from writing unnecessary key commands
-  boolean keys_have_changed = false;
-  // Tracks state of modifier keys (currently unused, running custom OS keymaps instead)
-  boolean state_shift = false;
-  boolean state_alt = false;
-  boolean state_ctrl = false;
-  boolean state_caps_lock = false;
-  // Tracks RESTORE and SHIFTLOCK parameters
-  boolean last_state_restore = false;
-  boolean last_state_shift_lock = false;
-  boolean state_restore = false;
-  boolean state_shift_lock = false;
-
-  boolean state_map[8][8] = {
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false}
-  };
-
-  boolean last_state_map[8][8] = {
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false},
-    {false,false,false,false,false,false,false,false}
-  };
-} g_key_states;
+#include "KeyMatrix.h"
 
 RgbLed status_led(Pins::RGB::red, Pins::RGB::green, Pins::RGB::blue);
 namespace led_color {
@@ -96,6 +54,8 @@ CD4051 column_cd4051(
   Pins::CD4051::Column::a2, 
   Pins::CD4051::Column::common_io
 );
+
+KeyMatrix key_matrix;
 
 void setup() {
   if (SystemOptions::debugEnabled) { Serial.begin(115200); }
@@ -130,36 +90,7 @@ void loop() {
 }
 
 void ScanKeys() {
-    // Make sure columns are running LOW
-    //digitalWrite(pin_colI, LOW);
-    //digitalWrite(pin_colZ, LOW);
-    g_key_states.keys_have_changed = false;
-    for (byte column = 0; g_key_matrix_size.columns > column; column++) {  
-      column_cd4051.Select(column);
-      for (byte row = 0; g_key_matrix_size.rows > row; row++) {
-        row_cd4051.Select(row);
-        g_key_states.state_map[row][column] = !row_cd4051.ReadCommonValue(); // true on LOW
-
-        if (g_key_states.last_state_map[row][column] != g_key_states.state_map[row][column]) { g_key_states.keys_have_changed = true; }
-      }
-    }
-
-    g_key_states.state_restore = !digitalRead(Pins::row_8); // true on LOW
-    g_key_states.state_shift_lock = !digitalRead(Pins::shift_lock); // true on LOW
-    // if (LOW == digitalRead(Pins::row_8)) { 
-    //   g_key_states.state_restore = true; 
-    // } else {
-    //   g_key_states.state_restore = false;
-    // }
-    // Read SHIFTLOCK status
-    // if (LOW == digitalRead(Pins::shift_lock)) {
-    //   g_key_states.state_shift_lock = true;
-    // } else {
-    //   g_key_states.state_shift_lock = false;
-    // }
-    if (g_key_states.last_state_restore != g_key_states.state_restore) { g_key_states.keys_have_changed = true; }
-    if (g_key_states.last_state_shift_lock != g_key_states.state_shift_lock) { g_key_states.keys_have_changed = true; }
-
+   //classed!
 }
 
 bool IsShiftActive(){
