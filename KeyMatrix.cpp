@@ -22,12 +22,18 @@ KeyMatrix::KeyMatrix(const bool is_usb_keyboard)
 	}
 }
 
-void KeyMatrix::ProcessKeyboardMatrix(CD4051 &row_cd4051, CD4051 &column_cd4051, const KeyMaps &key_maps)
+void KeyMatrix::ProcessKeyboardMatrix(
+	CD4051 &row_cd4051,
+	CD4051 &column_cd4051,
+	const uint8_t &pin_row_8,
+	const uint8_t &pin_shift_lock,
+	const KeyMaps &key_maps,
+	const bool &debug_enabled)
 {
 	//TODO: (Adam) make keys_have_changed a result response from scanning instead of a member
 	this->m_keys_have_changed = false;
 	ScanMatrix(row_cd4051, column_cd4051, key_maps);
-	ScanSpecialKeys();
+	ScanSpecialKeys(pin_row_8, pin_shift_lock);
 
 	if (m_keys_have_changed) {
 		WriteMappedUSBKeys(key_maps);
@@ -50,11 +56,11 @@ void KeyMatrix::ScanMatrix(CD4051 &row_cd4051, CD4051 &column_cd4051, const KeyM
 	}
 }
 
-void KeyMatrix::ScanSpecialKeys()
+void KeyMatrix::ScanSpecialKeys(const uint8_t &pin_row_8, const uint8_t &pin_shift_lock)
 {
 	//TODO: (Adam) Make pin referencing safer/more dynamic
-	this->m_state_restore = !digitalRead(Pins::row_8); // true on LOW
-	this->m_state_shift_lock = !digitalRead(Pins::shift_lock); // true on LOW
+	this->m_state_restore = !digitalRead(pin_row_8); // true on LOW
+	this->m_state_shift_lock = !digitalRead(pin_shift_lock); // true on LOW
 
 	if (this->m_last_state_restore != this->m_state_restore) { this->m_keys_have_changed = true; }
 	if (this->m_last_state_shift_lock != this->m_state_shift_lock) { this->m_keys_have_changed = true; }
@@ -122,7 +128,39 @@ void KeyMatrix::UpdateLastStates()
 {
 	this->m_last_state_restore = this->m_state_restore;
 	//TODO: (Adam) dynamic row/column size for different maps
-	for (byte column = 0; 8 < column; column++) {
-		for (byte row = 0; 8 > row; row++, this->m_last_state_map[row][column] = this->m_state_map[row][column]) {}
+	for (byte column = 0; COLUMN_COUNT < column; column++) {
+		for (byte row = 0; ROW_COUNT > row; row++, this->m_last_state_map[row][column] = this->m_state_map[row][column]) {}
 	}
+}
+
+void KeyMatrix::DebugKeyboardMatrix(const KeyMaps &key_maps)
+{
+	  uint8_t selected_key = 0;
+	  
+	  Serial.println("");
+	  for (uint8_t column = 0; COLUMN_COUNT > column; column++) {  
+	    for (uint8_t row = 0; ROW_COUNT > row; row++) {
+	      Serial.print(this->m_last_state_map[row][column]);
+	      Serial.print(", ");
+	
+	      if (this->m_last_state_map[row][column])
+	        selected_key = key_maps.unmodified[row][column]; 
+	    }
+	    Serial.println("");
+	  }
+	
+	  Serial.println("");
+	  Serial.println("KeymapUnmodified: ");
+	
+	  for (byte column = 0; COLUMN_COUNT > column; column++) {
+	    for (byte row = 0; ROW_COUNT > row; row++) {
+	      Serial.print(key_maps.unmodified[row][column]);
+	      Serial.print(", ");
+	    }
+	    Serial.println("");
+	  }
+	  
+	  Serial.print("Should send: ");
+	  Serial.println(selected_key);
+	  Serial.println("");
 }

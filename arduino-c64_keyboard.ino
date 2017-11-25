@@ -72,7 +72,14 @@ void setup() {
 void loop() {
   unsigned long start_time = 0;
   if  ((millis() - start_time) > SystemOptions::debounce_time) {
-	  usb_key_matrix.ProcessKeyboardMatrix(row_cd4051, column_cd4051, c64_key_maps);
+	  usb_key_matrix.ProcessKeyboardMatrix(
+		  row_cd4051, 
+		  column_cd4051, 
+		  Pins::row_8,
+		  Pins::shift_lock,
+		  c64_key_maps,
+		  SystemOptions::debugEnabled
+	  );
       start_time = millis();
   }
 }
