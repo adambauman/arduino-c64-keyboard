@@ -27,6 +27,7 @@
 #include <Keyboard.h>
 #include "C64KeyMaps.h"
 #include "Configuration.h"
+#include "RgbLed.h"
 
 // Size of the keyboard matrix. C64 is technically 9x9 but the RESTORE key lives on its own and is handled seperatly
 struct {
@@ -71,10 +72,19 @@ struct {
   };
 } g_key_states;
 
+RgbLed status_led(Pins::RGB::red, Pins::RGB::green, Pins::RGB::blue);
+namespace led_color {
+  RgbColor red {255, 0, 0};
+  RgbColor green {0, 255, 0};
+  RgbColor blue {0, 0, 255};
+  RgbColor orange {255, 147, 41};
+  RgbColor yellow {255, 255, 0};
+  RgbColor white {255, 255, 255};
+}
+
 void setup() {
   if (SystemOptions::debugEnabled) { Serial.begin(115200); }
-  Keyboard.begin(); 
-
+  Keyboard.begin();
   pinMode(Pins::shift_lock, INPUT_PULLUP);
   pinMode(Pins::column_i, OUTPUT);
   pinMode(Pins::row_8, INPUT_PULLUP);
