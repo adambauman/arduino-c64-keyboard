@@ -8,13 +8,16 @@
 #include "CD4051.h"
 #endif
 
-#define KEY_MATRIX_ROWS 8
-#define KEY_MATRIX_COLUMNS 8
-
 class KeyMatrix {
     public:
-        KeyMatrix();
-        void ScanKeys(CD4051 &row_cd4051, CD4051 &column_cd4051);
+        KeyMatrix(const bool is_usb_keyboard);
+        void ScanMatrix(CD4051 &row_cd4051, CD4051 &column_cd4051);
+		void ScanSpecialKeys(CD4051 &row_cd4051, CD4051 &column_cd4051);
+		void WriteMappedUSBKeys(const KeyMaps &key_maps);
+		void WriteC64SpecialUSBKeys(const KeyMaps &key_maps);
+	private:
+		void KeyToggleAction(const uint8_t row, const uint8_t column, const KeyMaps &key_maps);
+		bool IsKeyboardShifted(const KeyMaps &key_maps);
 	private:
 		boolean m_keys_have_changed;
 		boolean m_state_shift;

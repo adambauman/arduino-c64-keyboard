@@ -24,7 +24,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <Keyboard.h>
 #include "C64KeyMaps.h"
 #include "Configuration.h"
 #include "RgbLed.h"
@@ -59,7 +58,6 @@ KeyMatrix key_matrix;
 
 void setup() {
   if (SystemOptions::debugEnabled) { Serial.begin(115200); }
-  Keyboard.begin();
   //NOTE: (Adam) For dual CD4051 key matrix one chip needs to sink current from the other
   column_cd4051.SetAsMatrixSink();
 
@@ -89,91 +87,33 @@ void loop() {
   g_key_states.keys_have_changed = false;
 }
 
-void ScanKeys() {
-   //classed!
-}
-
-bool IsShiftActive(){
-  bool shift_pressed = false;
-  bool left_shift_pressed = g_key_states.state_map[C64KeyMaps::left_shift_position_row][C64KeyMaps::left_shift_position_column];
-  bool right_shift_pressed = g_key_states.state_map[C64KeyMaps::right_shift_position_row][C64KeyMaps::right_shift_position_column];
-  if (left_shift_pressed || right_shift_pressed) { shift_pressed = true; }
-  return(shift_pressed);
-}
-
-void KeyPressAction(int row, int column)
-{
-  if (IsShiftActive()) {
-    //TODO: figure out why row and column need to be reversed here
-    Keyboard.press(C64KeyMaps::shifted[column][row]); 
-  } else {
-    Keyboard.press(C64KeyMaps::unmodified[column][row]); 
-  }
-}
-
-void KeyReleaseAction(int row, int column)
-{
-  if (IsShiftActive()) {
-    //TODO: figure out why row and column need to be reversed here
-    Keyboard.release(C64KeyMaps::shifted[column][row]); 
-  } else {
-    Keyboard.release(C64KeyMaps::unmodified[column][row]); 
-  }
-}
-
-void WriteKeys()
-{
-  for (byte column = 0; g_key_matrix_size.columns > column; column++){
-    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
-      if (g_key_states.state_map[row][column] && !g_key_states.last_state_map[row][column]) {
-        KeyPressAction(row, column);
-      } else if (!g_key_states.state_map[row][column] && g_key_states.last_state_map[row][column]) {
-        KeyReleaseAction(row, column);
-      }
-    }
-  }
-
-  if (g_key_states.state_restore && !g_key_states.last_state_restore) {
-    Keyboard.press(C64KeyMaps::restore_key);
-  } else if (!g_key_states.state_restore && g_key_states.last_state_restore) {
-    Keyboard.release(C64KeyMaps::restore_key);
-  }
-
-  // Process the SHIFTLOCK key, use .write() since the key physically locks in place
-  if (g_key_states.state_shift_lock && !g_key_states.last_state_map) {
-    Keyboard.write(KEYDEC_CLOK);
-  } else if (!g_key_states.state_shift_lock && g_key_states.last_state_shift_lock) {
-    Keyboard.write(KEYDEC_CLOK);
-  }
-}
-
-void DebugKeys() {
-  int selected_key = 0;
-  
-  Serial.println("");
-  for (byte column = 0; g_key_matrix_size.columns > column; column++) {  
-    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
-      Serial.print(g_key_states.last_state_map[row][column]);
-      Serial.print(", ");
-
-      if (g_key_states.last_state_map[row][column])
-        selected_key = C64KeyMaps::unmodified[row][column]; 
-    }
-    Serial.println("");
-  }
-
-  Serial.println("");
-  Serial.println("KeymapUnmodified: ");
-
-  for (byte column = 0; g_key_matrix_size.columns > column; column++) {
-    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
-      Serial.print(C64KeyMaps::unmodified[row][column]);
-      Serial.print(", ");
-    }
-    Serial.println("");
-  }
-  
-  Serial.print("Should send: ");
-  Serial.println(selected_key);
-  Serial.println("");
-}
+//void DebugKeys() {
+//  int selected_key = 0;
+//  
+//  Serial.println("");
+//  for (byte column = 0; g_key_matrix_size.columns > column; column++) {  
+//    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
+//      Serial.print(g_key_states.last_state_map[row][column]);
+//      Serial.print(", ");
+//
+//      if (g_key_states.last_state_map[row][column])
+//        selected_key = C64KeyMaps::unmodified[row][column]; 
+//    }
+//    Serial.println("");
+//  }
+//
+//  Serial.println("");
+//  Serial.println("KeymapUnmodified: ");
+//
+//  for (byte column = 0; g_key_matrix_size.columns > column; column++) {
+//    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
+//      Serial.print(C64KeyMaps::unmodified[row][column]);
+//      Serial.print(", ");
+//    }
+//    Serial.println("");
+//  }
+//  
+//  Serial.print("Should send: ");
+//  Serial.println(selected_key);
+//  Serial.println("");
+//}
