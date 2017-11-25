@@ -25,13 +25,13 @@ struct KeyMaps {
 
 	// Matrix of SHIFT modified keycodes
 	const uint8_t shifted[8][8] = {
-	{ KEYDEC_EXCL, KEYDEC_TILD, 0,           0,           0,           0,           0,          KEYDEC_DQUT },
-	{ KEYDEC_HASH, 0,           0,           0,           0,           0,           0,          KEYDEC_DOLR },
-	{ 37,          0,           0,           0,           0,           0,           0,          KEYDEC_AMPR },
-	{ KEYDEC_SQUT, 0,           0,           0,           0,           KEYDEC_H,    0,          KEYDEC_LPAR },
-	{ KEYDEC_RPAR, 0,           0,           0,           0,           0,           0,          KEYDEC_CART },
-	{  0,          0,           0,           60,          KEYDEC_LSTH, KEYDEC_LBRA, 0,          KEYDEC_UNDR },
-	{  0,          0,           KEYDEC_BSLA, KEYDEC_QUES, 0,           0,           KEYDEC_PDN, KEYDEC_HOM}
+	{ KEYDEC_EXCL, KEYDEC_TILD, 0,           0,           0,           0,           KEYDEC_UC_Q, KEYDEC_DQUT },
+	{ KEYDEC_HASH, KEYDEC_UC_W, 0,           0,           0,           0,           0,           KEYDEC_DOLR },
+	{ 37,          0,           0,           0,           0,           0,           0,           KEYDEC_AMPR },
+	{ KEYDEC_SQUT, 0,           0,           0,           0,           KEYDEC_H,    0,           KEYDEC_LPAR },
+	{ KEYDEC_RPAR, 0,           0,           0,           0,           0,           0,           KEYDEC_CART },
+	{  0,          0,           0,           60,          KEYDEC_LSTH, KEYDEC_LBRA, 0,           KEYDEC_UNDR },
+	{  0,          0,           KEYDEC_BSLA, KEYDEC_QUES, 0,           0,           KEYDEC_PDN,  KEYDEC_HOM}
 	};
 
 	const uint8_t restore_key = KEYDEC_BSP;

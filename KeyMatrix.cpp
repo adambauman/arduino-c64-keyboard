@@ -16,8 +16,8 @@ KeyMatrix::KeyMatrix(const bool is_usb_keyboard)
 	this->m_state_shift_lock = false;
 
 	//TODO: (Adam) Gotta be a way to make status matrix dynamic and track better
-	for (uint8_t column = 0; 8 > column; column++) {
-		for (uint8_t row = 0; 8 > row; row++,
+	for (uint8_t column = 0; COLUMN_COUNT > column; column++) {
+		for (uint8_t row = 0; ROW_COUNT > row; row++,
 			m_state_map[row][column] = false, m_last_state_map[row][column] = false) {}
 	}
 }
@@ -34,6 +34,8 @@ void KeyMatrix::ProcessKeyboardMatrix(
 	this->m_keys_have_changed = false;
 	ScanMatrix(row_cd4051, column_cd4051, key_maps);
 	ScanSpecialKeys(pin_row_8, pin_shift_lock);
+
+	if (debug_enabled) { DebugKeyboardMatrix(key_maps); }
 
 	if (m_keys_have_changed) {
 		WriteMappedUSBKeys(key_maps);
