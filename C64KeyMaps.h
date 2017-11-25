@@ -7,12 +7,9 @@
 #include "KeyDefines.h"
 #endif
 
-#define KEY_MATRIX_ROWS 8
-#define KEY_MATRIX_COLUMNS 8
-
 struct KeyMaps {
-	const uint8_t map_rows = 8;
-	const uint8_t map_columns = 8;
+	const uint8_t row_count = 8;
+	const uint8_t column_count = 8;
 
 	// Matrix of un-modified keycodes
 	const uint8_t unmodified[8][8] = {
@@ -44,12 +41,6 @@ struct KeyMaps {
   
 	const uint8_t right_shift_position_row = 6;
 	const uint8_t right_shift_position_column = 4;
-
-	//class KeyMapInterface {
-	//public:
-	//	uint8_t GetUnmodifiedKeyCode(const uint8_t row, const uint8_t column);
-		//uint8_t GetShiftedKeyCode(const uint8_t row, const uint8_t column);
-	//};
 };
 
 #endif

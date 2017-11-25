@@ -101,7 +101,6 @@
     <ClInclude Include="__vm\.arduino-c64_keyboard.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C64KeyMaps.cpp" />
     <ClCompile Include="CD4051.cpp" />
     <ClCompile Include="KeyMatrix.cpp" />
     <ClCompile Include="RgbLed.cpp" />

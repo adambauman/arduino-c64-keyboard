@@ -11,13 +11,15 @@
 class KeyMatrix {
     public:
         KeyMatrix(const bool is_usb_keyboard);
-        void ScanMatrix(CD4051 &row_cd4051, CD4051 &column_cd4051);
-		void ScanSpecialKeys(CD4051 &row_cd4051, CD4051 &column_cd4051);
+		void ProcessKeyboardMatrix(CD4051 &row_cd4051, CD4051 &column_cd4051, const KeyMaps &key_maps);
+	private:
+		void ScanMatrix(CD4051 &row_cd4051, CD4051 &column_cd4051, const KeyMaps &key_maps);
+		void ScanSpecialKeys();
 		void WriteMappedUSBKeys(const KeyMaps &key_maps);
 		void WriteC64SpecialUSBKeys(const KeyMaps &key_maps);
-	private:
 		void KeyToggleAction(const uint8_t row, const uint8_t column, const KeyMaps &key_maps);
 		bool IsKeyboardShifted(const KeyMaps &key_maps);
+		void UpdateLastStates();
 	private:
 		boolean m_keys_have_changed;
 		boolean m_state_shift;
@@ -29,8 +31,9 @@ class KeyMatrix {
 		boolean m_state_restore;
 		boolean m_state_shift_lock;
 
-		boolean m_state_map[KEY_MATRIX_ROWS][KEY_MATRIX_COLUMNS];
-		boolean m_last_state_map[KEY_MATRIX_ROWS][KEY_MATRIX_COLUMNS];
+		//TODO: (Adam) Figure out a way to make these dynamic or track better
+		boolean m_state_map[8][8];
+		boolean m_last_state_map[8][8];
 };
 
 #endif

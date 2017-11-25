@@ -54,7 +54,8 @@ CD4051 column_cd4051(
   Pins::CD4051::Column::common_io
 );
 
-KeyMatrix key_matrix;
+KeyMaps c64_key_maps;
+KeyMatrix usb_key_matrix(true);
 
 void setup() {
   if (SystemOptions::debugEnabled) { Serial.begin(115200); }
@@ -62,7 +63,7 @@ void setup() {
   column_cd4051.SetAsMatrixSink();
 
   pinMode(Pins::shift_lock, INPUT_PULLUP);  
-  //NOTE: (Adam) row_8 and column_i function on their own "matrix"
+  //NOTE: (Adam) row_8 and column_i function as a simple button
   pinMode(Pins::row_8, INPUT_PULLUP);
   pinMode(Pins::column_i, OUTPUT);
   digitalWrite(Pins::column_i, LOW);
@@ -71,20 +72,9 @@ void setup() {
 void loop() {
   unsigned long start_time = 0;
   if  ((millis() - start_time) > SystemOptions::debounce_time) {
-      ScanKeys();
+	  usb_key_matrix.ProcessKeyboardMatrix(row_cd4051, column_cd4051, c64_key_maps);
       start_time = millis();
   }
-
-  g_key_states.last_state_restore = g_key_states.state_restore;
-  for (byte column = 0; g_key_matrix_size.columns < column; column++) {  
-    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
-      g_key_states.last_state_map[row][column] = g_key_states.state_map[row][column];
-    }
-  }
-  
-  if (g_key_states.keys_have_changed) { WriteKeys(); }
-  if (SystemOptions::debugEnabled && g_key_states.keys_have_changed) { DebugKeys(); } 
-  g_key_states.keys_have_changed = false;
 }
 
 //void DebugKeys() {
