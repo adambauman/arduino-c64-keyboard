@@ -28,6 +28,7 @@
 #include "C64KeyMaps.h"
 #include "Configuration.h"
 #include "RgbLed.h"
+#include "CD4051.h"
 
 // Size of the keyboard matrix. C64 is technically 9x9 but the RESTORE key lives on its own and is handled seperatly
 struct {
@@ -82,22 +83,30 @@ namespace led_color {
   RgbColor white {255, 255, 255};
 }
 
+CD4051 row_cd4051(
+  Pins::CD4051::Row::a0, 
+  Pins::CD4051::Row::a1, 
+  Pins::CD4051::Row::a2, 
+  Pins::CD4051::Row::common_io
+);
+
+CD4051 column_cd4051(
+  Pins::CD4051::Column::a0, 
+  Pins::CD4051::Column::a1, 
+  Pins::CD4051::Column::a2, 
+  Pins::CD4051::Column::common_io
+);
+
 void setup() {
   if (SystemOptions::debugEnabled) { Serial.begin(115200); }
   Keyboard.begin();
-  pinMode(Pins::shift_lock, INPUT_PULLUP);
-  pinMode(Pins::column_i, OUTPUT);
+  //NOTE: (Adam) For dual CD4051 key matrix one chip needs to sink current from the other
+  column_cd4051.SetAsMatrixSink();
+
+  pinMode(Pins::shift_lock, INPUT_PULLUP);  
+  //NOTE: (Adam) row_8 and column_i function on their own "matrix"
   pinMode(Pins::row_8, INPUT_PULLUP);
-  pinMode(Pins::CD4051::Column::common_io, OUTPUT);
-  pinMode(Pins::CD4051::Column::a0, OUTPUT);
-  pinMode(Pins::CD4051::Column::a1, OUTPUT);
-  pinMode(Pins::CD4051::Column::a2, OUTPUT);
-  pinMode(Pins::CD4051::Row::common_io, INPUT_PULLUP); 
-  pinMode(Pins::CD4051::Row::a0, OUTPUT);
-  pinMode(Pins::CD4051::Row::a1, OUTPUT);
-  pinMode(Pins::CD4051::Row::a2, OUTPUT);
-  // Row drops LOW when button closed to column. Drop columns LOW so they're ready.
-  digitalWrite(Pins::CD4051::Column::common_io, LOW);
+  pinMode(Pins::column_i, OUTPUT);
   digitalWrite(Pins::column_i, LOW);
 }
 
@@ -120,33 +129,17 @@ void loop() {
   g_key_states.keys_have_changed = false;
 }
 
-void ColumnCD4051Select(int column) {
-  digitalWrite(Pins::CD4051::Column::a0, bitRead(column, 0));
-  digitalWrite(Pins::CD4051::Column::a1, bitRead(column, 1));
-  digitalWrite(Pins::CD4051::Column::a2, bitRead(column, 2));
-}
-
-void RowCD4015Select(int row) {
-  digitalWrite(Pins::CD4051::Row::a0, bitRead(row, 0));
-  digitalWrite(Pins::CD4051::Row::a1, bitRead(row, 1));
-  digitalWrite(Pins::CD4051::Row::a2, bitRead(row, 2));
-}
-
 void ScanKeys() {
     // Make sure columns are running LOW
     //digitalWrite(pin_colI, LOW);
     //digitalWrite(pin_colZ, LOW);
     g_key_states.keys_have_changed = false;
     for (byte column = 0; g_key_matrix_size.columns > column; column++) {  
-      ColumnCD4051Select(column);
+      column_cd4051.Select(column);
       for (byte row = 0; g_key_matrix_size.rows > row; row++) {
-        RowCD4015Select(row);
-        g_key_states.state_map[row][column] = !digitalRead(Pins::CD4051::Row::common_io); // true on LOW
-        // if (LOW == digitalRead(Pins::CD4051::Row::common_io)) { 
-        //   g_key_states.state_map[row][column] = true;
-        // } else {
-        //   g_key_states.state_map[row][column] = false;
-        // }
+        row_cd4051.Select(row);
+        g_key_states.state_map[row][column] = !row_cd4051.ReadCommonValue(); // true on LOW
+
         if (g_key_states.last_state_map[row][column] != g_key_states.state_map[row][column]) { g_key_states.keys_have_changed = true; }
       }
     }
@@ -220,36 +213,6 @@ void WriteKeys()
     Keyboard.write(KEYDEC_CLOK);
   } else if (!g_key_states.state_shift_lock && g_key_states.last_state_shift_lock) {
     Keyboard.write(KEYDEC_CLOK);
-  }
-}
-
-void SetLED(int requested_status) {
-  // Only run if RGB LED is enabled in the setup parameters
-  if (SystemOptions::RGBenabled) {
-    switch (requested_status) {
-      case 0: // Normal (red)
-        analogWrite(Pins::RGB::red, 255);
-        analogWrite(Pins::RGB::green, 0);
-        analogWrite(Pins::RGB::blue, 0);
-        break;
-      case 1: // Capslock Enabled (blue)
-        analogWrite(Pins::RGB::red, 0);
-        analogWrite(Pins::RGB::green, 0);
-        analogWrite(Pins::RGB::blue, 255);
-        break;
-      case 2: // Battery Good (green)
-        analogWrite(Pins::RGB::red, 0);
-        analogWrite(Pins::RGB::green, 255);
-        analogWrite(Pins::RGB::blue, 0);
-        break;
-      case 3: // Battery Warning (yellow)
-        analogWrite(Pins::RGB::red, 255);
-        analogWrite(Pins::RGB::green, 255);
-        analogWrite(Pins::RGB::blue, 0);
-        break;
-      default:
-        break;
-    }
   }
 }
 
