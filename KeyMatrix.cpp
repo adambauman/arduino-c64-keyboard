@@ -35,7 +35,10 @@ void KeyMatrix::ProcessKeyboardMatrix(
 	ScanMatrix(row_cd4051, column_cd4051, key_maps);
 	ScanSpecialKeys(pin_row_8, pin_shift_lock);
 
-	if (debug_enabled) { DebugKeyboardMatrix(key_maps); }
+	//TODO: (Adam) obliterate debug_enabled
+#ifdef _DEBUG
+	if (this->m_keys_have_changed) { DebugKeyboardMatrix(key_maps); }
+#endif
 
 	if (m_keys_have_changed) {
 		WriteMappedUSBKeys(key_maps);
@@ -49,10 +52,18 @@ void KeyMatrix::ScanMatrix(CD4051 &row_cd4051, CD4051 &column_cd4051, const KeyM
 {
 	this->m_keys_have_changed = false;
 	for (uint8_t column = 0; key_maps.column_count > column; column++) {
+#ifdef _DEBUG
+		Serial.print("Column: "); Serial.println(column);
+#endif
 		column_cd4051.Select(column);
 		for (uint8_t row = 0; key_maps.row_count > row; row++) {
 			row_cd4051.Select(row);
 			this->m_state_map[row][column] = !row_cd4051.ReadCommonValue(); // true on LOW
+#ifdef _DEBUG
+			Serial.print("Row: "); Serial.println(row);
+			Serial.print("CommonValue: "); Serial.println(row_cd4051.ReadCommonValue());
+			if (this->m_state_map[row][column]) { Serial.print("ScanMatrix() detects change in "); Serial.print(row); Serial.print(":"), Serial.println(column); }
+#endif
 			if (this->m_last_state_map[row][column] != this->m_state_map[row][column]) { this->m_keys_have_changed = true; }
 		}
 	}

@@ -17,6 +17,9 @@ CD4051::CD4051(uint8_t pin_a0, uint8_t pin_a1, uint8_t pin_a2, uint8_t pin_commo
 
 void CD4051::Select(uint8_t io_number)
 {
+#ifdef _DEBUG
+	//Serial.print("Selecting: "); Serial.println(io_number);
+#endif
     digitalWrite(this->m_pin_a0, bitRead(io_number, 0));
     digitalWrite(this->m_pin_a1, bitRead(io_number, 1));
     digitalWrite(this->m_pin_a2, bitRead(io_number, 2));
@@ -30,7 +33,16 @@ uint8_t CD4051::ReadCommonValue()
 
 void CD4051::SetAsMatrixSink()
 {
+#ifdef _DEBUG
+	Serial.println("CD4051 set as sink");
+#endif
     //NOTE: (Adam) Running CD4051 matrix as button active on LOW
     pinMode(this->m_pin_common_io, OUTPUT);
     digitalWrite(this->m_pin_common_io, LOW);    
+}
+
+void CD4051::SetAsMatrixEnergize()
+{
+	pinMode(this->m_pin_common_io, INPUT_PULLUP);
+	digitalWrite(this->m_pin_common_io, HIGH);
 }

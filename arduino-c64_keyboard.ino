@@ -61,6 +61,7 @@ void setup() {
   if (SystemOptions::debugEnabled) { Serial.begin(115200); }
   //NOTE: (Adam) For dual CD4051 key matrix one chip needs to sink current from the other
   column_cd4051.SetAsMatrixSink();
+  //row_cd4051.SetAsMatrixEnergize();
 
   pinMode(Pins::shift_lock, INPUT_PULLUP);  
   //NOTE: (Adam) row_8 and column_i function as a simple button
@@ -83,34 +84,3 @@ void loop() {
       start_time = millis();
   }
 }
-
-//void DebugKeys() {
-//  int selected_key = 0;
-//  
-//  Serial.println("");
-//  for (byte column = 0; g_key_matrix_size.columns > column; column++) {  
-//    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
-//      Serial.print(g_key_states.last_state_map[row][column]);
-//      Serial.print(", ");
-//
-//      if (g_key_states.last_state_map[row][column])
-//        selected_key = C64KeyMaps::unmodified[row][column]; 
-//    }
-//    Serial.println("");
-//  }
-//
-//  Serial.println("");
-//  Serial.println("KeymapUnmodified: ");
-//
-//  for (byte column = 0; g_key_matrix_size.columns > column; column++) {
-//    for (byte row = 0; g_key_matrix_size.rows > row; row++) {
-//      Serial.print(C64KeyMaps::unmodified[row][column]);
-//      Serial.print(", ");
-//    }
-//    Serial.println("");
-//  }
-//  
-//  Serial.print("Should send: ");
-//  Serial.println(selected_key);
-//  Serial.println("");
-//}

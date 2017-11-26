@@ -16,6 +16,8 @@
 #define ROW_COUNT 8
 #define COLUMN_COUNT 8
 
+#define _DEBUG
+
 class KeyMatrix {
     public:
         KeyMatrix(const bool is_usb_keyboard);

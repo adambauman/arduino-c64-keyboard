@@ -1,6 +1,9 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+// Define _DEBUG to enable inline serial debugging
+#define _DEBUG
+
 namespace SystemOptions {
     // Set TRUE to enable serial debugging
     boolean debugEnabled = true;
