@@ -1,11 +1,6 @@
-// C64KeyMaps.h
-
 #ifndef C64_KEY_MAPS_H
 #define C64_KEY_MAPS_H
-
-#ifndef KEY_DEFINES_H
 #include "KeyDefines.h"
-#endif
 
 struct KeyMaps {
 	const uint8_t row_count = 8;

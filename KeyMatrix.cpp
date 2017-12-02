@@ -1,7 +1,8 @@
+#include "Common.h"
 #include "KeyMatrix.h"
-#include <Keyboard.h>
+//#include <Keyboard.h>
 
-KeyMatrix::KeyMatrix(const bool is_usb_keyboard)
+KeyMatrix::KeyMatrix(IN const bool is_usb_keyboard)
 {
 	if (is_usb_keyboard) { Keyboard.begin(); }
 
@@ -23,12 +24,12 @@ KeyMatrix::KeyMatrix(const bool is_usb_keyboard)
 }
 
 void KeyMatrix::ProcessKeyboardMatrix(
-	CD4051 &row_cd4051,
-	CD4051 &column_cd4051,
-	const uint8_t &pin_row_8,
-	const uint8_t &pin_shift_lock,
-	const KeyMaps &key_maps,
-	const bool &debug_enabled)
+	IN CD4051 &row_cd4051,
+	IN CD4051 &column_cd4051,
+	IN const uint8_t &pin_row_8,
+	IN const uint8_t &pin_shift_lock,
+	IN const KeyMaps &key_maps,
+	IN const bool &debug_enabled)
 {
 	//TODO: (Adam) make keys_have_changed a result response from scanning instead of a member
 	this->m_keys_have_changed = false;
@@ -48,7 +49,7 @@ void KeyMatrix::ProcessKeyboardMatrix(
 	UpdateLastStates();
 }
 
-void KeyMatrix::ScanMatrix(CD4051 &row_cd4051, CD4051 &column_cd4051, const KeyMaps &key_maps)
+void KeyMatrix::ScanMatrix(IN CD4051 &row_cd4051, IN CD4051 &column_cd4051, IN const KeyMaps &key_maps)
 {
 	this->m_keys_have_changed = false;
 	for (uint8_t column = 0; key_maps.column_count > column; column++) {
@@ -69,7 +70,7 @@ void KeyMatrix::ScanMatrix(CD4051 &row_cd4051, CD4051 &column_cd4051, const KeyM
 	}
 }
 
-void KeyMatrix::ScanSpecialKeys(const uint8_t &pin_row_8, const uint8_t &pin_shift_lock)
+void KeyMatrix::ScanSpecialKeys(IN const uint8_t &pin_row_8, IN const uint8_t &pin_shift_lock)
 {
 	//TODO: (Adam) Make pin referencing safer/more dynamic
 	this->m_state_restore = !digitalRead(pin_row_8); // true on LOW
@@ -79,7 +80,7 @@ void KeyMatrix::ScanSpecialKeys(const uint8_t &pin_row_8, const uint8_t &pin_shi
 	if (this->m_last_state_shift_lock != this->m_state_shift_lock) { this->m_keys_have_changed = true; }
 }
 
-void KeyMatrix::WriteMappedUSBKeys(const KeyMaps &key_maps)
+void KeyMatrix::WriteMappedUSBKeys(IN const KeyMaps &key_maps)
 {
 	for (byte column = 0; key_maps.column_count > column; column++) {
 		for (byte row = 0; key_maps.row_count > row; row++) {
@@ -88,7 +89,7 @@ void KeyMatrix::WriteMappedUSBKeys(const KeyMaps &key_maps)
 	}
 }
 
-void KeyMatrix::WriteC64SpecialUSBKeys(const KeyMaps &key_maps)
+void KeyMatrix::WriteC64SpecialUSBKeys(IN const KeyMaps &key_maps)
 {
 	if (this->m_state_restore && !this->m_last_state_restore) {
 		Keyboard.press(key_maps.restore_key);
@@ -106,7 +107,7 @@ void KeyMatrix::WriteC64SpecialUSBKeys(const KeyMaps &key_maps)
 	}
 }
 
-void KeyMatrix::KeyToggleAction(const uint8_t row, const uint8_t column, const KeyMaps &key_maps)
+void KeyMatrix::KeyToggleAction(IN const uint8_t row, IN const uint8_t column, IN const KeyMaps &key_maps)
 {
 	if (this->m_state_map[row][column] && !this->m_last_state_map[row][column]) {
 		if (IsKeyboardShifted(key_maps)) {
@@ -128,7 +129,7 @@ void KeyMatrix::KeyToggleAction(const uint8_t row, const uint8_t column, const K
 	}
 }
 
-bool KeyMatrix::IsKeyboardShifted(const KeyMaps &key_maps)
+bool KeyMatrix::IsKeyboardShifted(IN const KeyMaps &key_maps)
 {
 	bool shift_pressed = false;
 	bool left_shift_pressed = this->m_state_map[key_maps.left_shift_position_row][key_maps.left_shift_position_column];
@@ -146,7 +147,7 @@ void KeyMatrix::UpdateLastStates()
 	}
 }
 
-void KeyMatrix::DebugKeyboardMatrix(const KeyMaps &key_maps)
+void KeyMatrix::DebugKeyboardMatrix(IN const KeyMaps &key_maps)
 {
 	  uint8_t selected_key = 0;
 	  

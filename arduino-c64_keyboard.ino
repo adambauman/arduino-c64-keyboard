@@ -24,13 +24,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "Common.h"
 #include "C64KeyMaps.h"
 #include "Configuration.h"
 #include "RgbLed.h"
 #include "CD4051.h"
 #include "KeyMatrix.h"
 
-RgbLed status_led(Pins::RGB::red, Pins::RGB::green, Pins::RGB::blue);
+RgbLed status_led(
+	PIN_RGB_RED, 
+	PIN_RGB_GREEN,
+	PIN_RGB_BLUE
+);
+
 namespace led_color {
   RgbColor red {255, 0, 0};
   RgbColor green {0, 255, 0};
@@ -41,45 +47,45 @@ namespace led_color {
 }
 
 CD4051 row_cd4051(
-  Pins::CD4051::Row::a0, 
-  Pins::CD4051::Row::a1, 
-  Pins::CD4051::Row::a2, 
-  Pins::CD4051::Row::common_io
+  PIN_CD4051_ROW_A0, 
+  PIN_CD4051_ROW_A1, 
+  PIN_CD4051_ROW_A2, 
+  PIN_CD4051_ROW_COMMON
 );
 
 CD4051 column_cd4051(
-  Pins::CD4051::Column::a0, 
-  Pins::CD4051::Column::a1, 
-  Pins::CD4051::Column::a2, 
-  Pins::CD4051::Column::common_io
+  PIN_CD4051_COLUMN_A0, 
+  PIN_CD4051_COLUMN_A1, 
+  PIN_CD4051_COLUMN_A2, 
+  PIN_CD4051_COLUMN_COMMON
 );
 
 KeyMaps c64_key_maps;
 KeyMatrix usb_key_matrix(true);
 
 void setup() {
-  if (SystemOptions::debugEnabled) { Serial.begin(115200); }
+  if (SYSTEM_DEBUG_ENABLED) { Serial.begin(115200); }
   //NOTE: (Adam) For dual CD4051 key matrix one chip needs to sink current from the other
   column_cd4051.SetAsMatrixSink();
   //row_cd4051.SetAsMatrixEnergize();
 
-  pinMode(Pins::shift_lock, INPUT_PULLUP);  
+  pinMode(PIN_SHIFT_LOCK, INPUT_PULLUP);  
   //NOTE: (Adam) row_8 and column_i function as a simple button
-  pinMode(Pins::row_8, INPUT_PULLUP);
-  pinMode(Pins::column_i, OUTPUT);
-  digitalWrite(Pins::column_i, LOW);
+  pinMode(PIN_ROW_8, INPUT_PULLUP);
+  pinMode(PIN_COLUMN_I, OUTPUT);
+  digitalWrite(PIN_COLUMN_I, LOW);
 }
 
 void loop() {
   unsigned long start_time = 0;
-  if  ((millis() - start_time) > SystemOptions::debounce_time) {
+  if  ((millis() - start_time) > SYSTEM_DEBOUNCE_TIME) {
 	  usb_key_matrix.ProcessKeyboardMatrix(
 		  row_cd4051, 
 		  column_cd4051, 
-		  Pins::row_8,
-		  Pins::shift_lock,
+		  PIN_ROW_8,
+		  PIN_SHIFT_LOCK,
 		  c64_key_maps,
-		  SystemOptions::debugEnabled
+		  SYSTEM_DEBUG_ENABLED
 	  );
       start_time = millis();
   }

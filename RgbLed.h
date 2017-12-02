@@ -1,20 +1,20 @@
 #ifndef RGBLED_H
 #define RGBLED_H
-
-#include <Arduino.h>
-#include <inttypes.h>
+//#include "CodeLabels.h"
+//#include <Arduino.h>
+//#include <inttypes.h>
 
 struct RgbColor {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
+    IN uint8_t red;
+    IN uint8_t green;
+    IN uint8_t blue;
 };
 
 class RgbLed {
     public:
-        RgbLed(uint8_t pin_red, uint8_t pin_green, uint8_t pin_blue);
+        RgbLed(IN uint8_t pin_red, IN uint8_t pin_green, IN uint8_t pin_blue);
 
-        void SoloChangeColor(RgbColor &rgb_color);
+        void SoloChangeColor(IN RgbColor &rgb_color);
         // ChangeMultiLights
         // Disable all lights
         // Enable all lights
