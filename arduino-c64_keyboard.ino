@@ -98,6 +98,9 @@ boolean keyMapHistory[rows][columns] = {
   {false,false,false,false,false,false,false,false}
 };
 
+CD4051 cd4015_column(PIN_CD4051_COLUMN_A0, PIN_CD4051_COLUMN_A1, PIN_CD4051_COLUMN_A2, PIN_CD4051_COLUMN_COMMON);
+CD4051 cd4015_row(PIN_CD4051_ROW_A0, PIN_CD4051_ROW_A1, PIN_CD4051_ROW_A2, PIN_CD4051_ROW_COMMON);
+
 
 //
 // setup()
@@ -106,21 +109,24 @@ void setup() {
   if (SYSTEM_DEBUG_ENABLED)
     Serial.begin(115200);
 
+  cd4015_column.SetAsOutput();
+  cd4015_row.SetAsInputPullup();
+
   // All key reading pins use the internal pullup resistors
   pinMode(PIN_SHIFT_LOCK, INPUT_PULLUP);
 
   pinMode(PIN_COLUMN_I, OUTPUT);
   pinMode(PIN_ROW_8, INPUT_PULLUP);
   
-  pinMode(PIN_CD4051_COLUMN_COMMON, OUTPUT);
-  pinMode(PIN_CD4051_COLUMN_A0, OUTPUT);
-  pinMode(PIN_CD4051_COLUMN_A1, OUTPUT);
-  pinMode(PIN_CD4051_COLUMN_A2, OUTPUT);
-  
-  pinMode(PIN_CD4051_ROW_COMMON, INPUT_PULLUP); 
-  pinMode(PIN_CD4051_ROW_A0, OUTPUT);
-  pinMode(PIN_CD4051_ROW_A1, OUTPUT);
-  pinMode(PIN_CD4051_ROW_A2, OUTPUT);
+  //pinMode(PIN_CD4051_COLUMN_COMMON, OUTPUT);
+  //pinMode(PIN_CD4051_COLUMN_A0, OUTPUT);
+  //pinMode(PIN_CD4051_COLUMN_A1, OUTPUT);
+  //pinMode(PIN_CD4051_COLUMN_A2, OUTPUT);
+  //
+  //pinMode(PIN_CD4051_ROW_COMMON, INPUT_PULLUP); 
+  //pinMode(PIN_CD4051_ROW_A0, OUTPUT);
+  //pinMode(PIN_CD4051_ROW_A1, OUTPUT);
+  //pinMode(PIN_CD4051_ROW_A2, OUTPUT);
 
   // Row drops low when button closed to column. Drop columns LOW so they're ready.
   digitalWrite(PIN_CD4051_COLUMN_COMMON, LOW);
@@ -164,30 +170,30 @@ void loop() {
 } // End loop()
 
 
-//
-// MuxColumn(int col)
-// Sets the column CD4051 selector
-//
-// int col = column number to select
-//
-void MuxColumn(int col) {
-  digitalWrite(PIN_CD4051_COLUMN_A0, bitRead(col, 0));
-  digitalWrite(PIN_CD4051_COLUMN_A1, bitRead(col, 1));
-  digitalWrite(PIN_CD4051_COLUMN_A2, bitRead(col, 2));
-}
-
-
-//
-// MuxRow(int row)
-// Sets the row CD4051 selector
-//
-// int row = row number to select
-//
-void MuxRow(int row) {
-  digitalWrite(PIN_CD4051_ROW_A0, bitRead(row, 0));
-  digitalWrite(PIN_CD4051_ROW_A1, bitRead(row, 1));
-  digitalWrite(PIN_CD4051_ROW_A2, bitRead(row, 2));
-}
+////
+//// MuxColumn(int col)
+//// Sets the column CD4051 selector
+////
+//// int col = column number to select
+////
+//void MuxColumn(int col) {
+//  /*digitalWrite(PIN_CD4051_COLUMN_A0, bitRead(col, 0));
+//  digitalWrite(PIN_CD4051_COLUMN_A1, bitRead(col, 1));
+//  digitalWrite(PIN_CD4051_COLUMN_A2, bitRead(col, 2));*/
+//	cd4015_column.Select(col);
+//}
+////
+//// MuxRow(int row)
+//// Sets the row CD4051 selector
+////
+//// int row = row number to select
+////
+//void MuxRow(int row) {
+//  //digitalWrite(PIN_CD4051_ROW_A0, bitRead(row, 0));
+//  //digitalWrite(PIN_CD4051_ROW_A1, bitRead(row, 1));
+//  //digitalWrite(PIN_CD4051_ROW_A2, bitRead(row, 2));
+//	cd4015_row.Select(row);
+//}
 
 
 //
@@ -201,10 +207,10 @@ void ScanKeys() {
       
     // Start working through the rows and columns and fill the status matrix
     for (byte c = 0; c < columns; c++) {  
-      MuxColumn(c);
-  
+		cd4015_column.Select(c);
+
       for (byte r = 0; r < rows; r++) {
-        MuxRow(r);
+        cd4015_row.Select(r);
 
         // Row reads TRUE if low
         if (digitalRead(PIN_CD4051_ROW_COMMON) == LOW) {
