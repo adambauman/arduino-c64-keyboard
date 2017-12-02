@@ -27,15 +27,15 @@
     <ClInclude Include="CD4051.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KeyMatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CD4051.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KeyMatrix.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RgbLed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
