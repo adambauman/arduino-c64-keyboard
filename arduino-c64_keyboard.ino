@@ -29,8 +29,8 @@
 #include "CD4051.h"
 
 // Size of the keyboard matrix. C64 is technically 9x9 but the RESTORE key lives on its own and is handled seperatly
-const byte rows = 8;
-const byte columns = 8;
+const uint8_t row_count = 8;
+const uint8_t column_count = 8;
 
 // Set if matrix is changed, stops loop from writing unnecessary key commands
 boolean keysHaveChanged = false;
@@ -52,7 +52,7 @@ unsigned long startTime = 0;
 unsigned int debounceTime = 10;
   
 // Matrix of un-modified keycodes (direct ASCII values)
-byte keyMapUnmodified[rows][columns] = {
+uint8_t keyMapUnmodified[row_count][column_count] = {
   { 49,  96, 128, 177,  32, 130, 113,  50},
   { 51, 119,  97, 129, 122, 115, 101,  52},
   { 55, 121, 103, 118,  98, 104, 117,  56},
@@ -64,7 +64,7 @@ byte keyMapUnmodified[rows][columns] = {
 };
 
 // Matrix of SHIFT modified keycodes (direct ASCII values) (currently unused, running custom OS keymaps instead)
-byte keyMapShifted[rows][columns] = {
+uint8_t keyMapShifted[row_count][column_count] = {
   { 33, 126,   0,   0,   0,   0,   0,  34},
   { 35,   0,   0,   0,   0,   0,   0,  36},
   { 37,   0,   0,   0,   0,   0,   0,  38},
@@ -75,7 +75,7 @@ byte keyMapShifted[rows][columns] = {
 };
 
 // Matrix of key status during a single scan loop
-boolean keyMapStatus[rows][columns] = {
+boolean keyMapStatus[row_count][column_count] = {
   {false,false,false,false,false,false,false,false},
   {false,false,false,false,false,false,false,false},
   {false,false,false,false,false,false,false,false},
@@ -87,7 +87,7 @@ boolean keyMapStatus[rows][columns] = {
 };
 
 // Matrix of key status during the last scan loop, compared to determine if keys have changed
-boolean keyMapHistory[rows][columns] = {
+boolean keyMapHistory[row_count][column_count] = {
   {false,false,false,false,false,false,false,false},
   {false,false,false,false,false,false,false,false},
   {false,false,false,false,false,false,false,false},
@@ -114,34 +114,18 @@ void setup() {
 
   // All key reading pins use the internal pullup resistors
   pinMode(PIN_SHIFT_LOCK, INPUT_PULLUP);
-
   pinMode(PIN_COLUMN_I, OUTPUT);
   pinMode(PIN_ROW_8, INPUT_PULLUP);
-  
-  //pinMode(PIN_CD4051_COLUMN_COMMON, OUTPUT);
-  //pinMode(PIN_CD4051_COLUMN_A0, OUTPUT);
-  //pinMode(PIN_CD4051_COLUMN_A1, OUTPUT);
-  //pinMode(PIN_CD4051_COLUMN_A2, OUTPUT);
-  //
-  //pinMode(PIN_CD4051_ROW_COMMON, INPUT_PULLUP); 
-  //pinMode(PIN_CD4051_ROW_A0, OUTPUT);
-  //pinMode(PIN_CD4051_ROW_A1, OUTPUT);
-  //pinMode(PIN_CD4051_ROW_A2, OUTPUT);
 
   // Row drops low when button closed to column. Drop columns LOW so they're ready.
   digitalWrite(PIN_CD4051_COLUMN_COMMON, LOW);
   digitalWrite(PIN_COLUMN_I, LOW);
 
   Keyboard.begin(); 
-  
-} // End setup()
+}
 
 
-//
-// loop()
-//
 void loop() {
-  // Simple debounce routine
   if  ((millis() - startTime) > debounceTime) {
       ScanKeys();
       startTime = millis();
@@ -152,10 +136,8 @@ void loop() {
     WriteKeys();
 
   // Mirror the status key map into the history key map
-  for (byte c = 0; c < columns; c++) {  
-    for (byte r = 0; r < rows; r++) {
-      keyMapHistory[r][c] = keyMapStatus[r][c];
-    }
+  for (uint8_t c = 0; c < column_count; c++) {  
+	  for (uint8_t r = 0; r < row_count; keyMapHistory[r][c] = keyMapStatus[r][c], r++) {}
   }
 
   // Mirror the status of the special keys
@@ -170,104 +152,42 @@ void loop() {
 } // End loop()
 
 
-////
-//// MuxColumn(int col)
-//// Sets the column CD4051 selector
-////
-//// int col = column number to select
-////
-//void MuxColumn(int col) {
-//  /*digitalWrite(PIN_CD4051_COLUMN_A0, bitRead(col, 0));
-//  digitalWrite(PIN_CD4051_COLUMN_A1, bitRead(col, 1));
-//  digitalWrite(PIN_CD4051_COLUMN_A2, bitRead(col, 2));*/
-//	cd4015_column.Select(col);
-//}
-////
-//// MuxRow(int row)
-//// Sets the row CD4051 selector
-////
-//// int row = row number to select
-////
-//void MuxRow(int row) {
-//  //digitalWrite(PIN_CD4051_ROW_A0, bitRead(row, 0));
-//  //digitalWrite(PIN_CD4051_ROW_A1, bitRead(row, 1));
-//  //digitalWrite(PIN_CD4051_ROW_A2, bitRead(row, 2));
-//	cd4015_row.Select(row);
-//}
-
-
-//
-// ScanKeys()
-// Scans the keyboard matrix
-//
 void ScanKeys() {
-    // Make sure columns are running LOW
-    //digitalWrite(PIN_COLUMN_I, LOW);
-    //digitalWrite(PIN_CD4051_COLUMN_COMMON, LOW);
-      
-    // Start working through the rows and columns and fill the status matrix
-    for (byte c = 0; c < columns; c++) {  
-		cd4015_column.Select(c);
+	for (uint8_t column = 0; column < column_count; column++) {
+		cd4015_column.Select(column);
+		for (uint8_t row = 0; row < row_count; row++) {
+			cd4015_row.Select(row);
+			keyMapStatus[row][column] = false;
+			if (!digitalRead(PIN_CD4051_ROW_COMMON)) { keyMapStatus[row][column] = true; } //Key active if LOW
+			if (keyMapStatus[row][column] != keyMapHistory[row][column]) { keysHaveChanged = true; }
+		}
+	}
 
-      for (byte r = 0; r < rows; r++) {
-        cd4015_row.Select(r);
+	statusRestore = false;
+    if (!digitalRead(PIN_ROW_8)) { statusRestore = true; }
+	statusShiftlock = false;
+	if (!digitalRead(PIN_SHIFT_LOCK)) { statusShiftlock = true; }
 
-        // Row reads TRUE if low
-        if (digitalRead(PIN_CD4051_ROW_COMMON) == LOW) {
-          keyMapStatus[r][c] = true;
-        } else {
-          keyMapStatus[r][c] = false;
-        }
-
-        // Compare the current key matrix to the matrix on the last loop, determine if keys have changed
-        if (keyMapStatus[r][c] != keyMapHistory[r][c])
-          keysHaveChanged = true;
-
-      } // endfor ROWS
-    } // endfor COLUMNS
-
-    // Read RESTORE status
-    if (digitalRead(PIN_ROW_8) == LOW) {
-      statusRestore = true;
-    } else {
-      statusRestore = false;
-    }
-
-    // Read SHIFTLOCK status
-    if (digitalRead(PIN_SHIFT_LOCK) == LOW) {
-      statusShiftlock = true;
-    } else {
-      statusShiftlock = false;
-    }
-
-    // Compare RESTORE and SHIFTLOCK status, determine if keys have changed.
-    if (historyRestore != statusRestore || historyShiftlock != statusShiftlock)
-      keysHaveChanged = true;
+	if (historyRestore != statusRestore || historyShiftlock != statusShiftlock) { keysHaveChanged = true; }
 }
 
-//
-// WriteKeys()
-// Writes the keys out through USBHID
 void WriteKeys() {
-  // Start with the key maps
-  for (byte c = 0; c < columns; c++){
-    for (byte r = 0; r < rows; r++) {
+  for (uint8_t c = 0; c < column_count; c++){
+    for (uint8_t r = 0; r < row_count; r++) {
       if (keyMapStatus[r][c] == true && keyMapHistory[r][c] == false) {
         Keyboard.press(keyMapUnmodified[c][r]); // column and row need to reversed. Sure I'm derping on something here, but it works
       } else if (keyMapStatus[r][c] == false && keyMapHistory[r][c] == true) {
         Keyboard.release(keyMapUnmodified[c][r]); // column and row need to reversed. Sure I'm derping on something here, but it works
       }
-    } // endfor ROWS
-  } // endfor COLUMNS
+    }
+  }
 
-  // Process the RESTORE key
   if (statusRestore == true && historyRestore == false) {
     Keyboard.press(178);
   } else if (statusRestore == false && historyRestore == true) {
     Keyboard.release(178);
   }
 
-  // Process the SHIFTLOCK key, use .write() since the key physically locks in place
   if (statusShiftlock == true && historyShiftlock == false) {
     Keyboard.write(193);
   } else if (statusShiftlock == false && historyShiftlock ==true) {
@@ -276,14 +196,7 @@ void WriteKeys() {
 }
 
 
-// 
-// SetLED(String requestedStatus)
-// Sets the color the RGB LED (if enabled)
-//
-// int requestedStatus = name of the status we want to indicate
-//
 void SetLED(int requestedStatus) {
-  // Only run if RGB LED is enabled in the setup parameters
   if (SYSTEM_RGB_ENABLED) {
     switch (requestedStatus) {
       case 0: // Normal (red)
@@ -313,16 +226,12 @@ void SetLED(int requestedStatus) {
 }
 
 
-//
-// DebugKeys()
-// Dumps debug information to the serial console
-//
 void DebugKeys() {
   int shouldSend = 0;
   
   Serial.println("");
-  for (byte c = 0; c < columns; c++) {  
-    for (byte r = 0; r < rows; r++) {
+  for (uint8_t c = 0; c < column_count; c++) {  
+    for (uint8_t r = 0; r < row_count; r++) {
       Serial.print(keyMapHistory[r][c]);
       Serial.print(", ");
 
@@ -335,8 +244,8 @@ void DebugKeys() {
   Serial.println("");
   Serial.println("KeymapUnmodified: ");
 
-  for (byte c = 0; c < columns; c++) {
-    for (byte r = 0; r < rows; r++) {
+  for (uint8_t c = 0; c < column_count; c++) {
+    for (uint8_t r = 0; r < row_count; r++) {
       Serial.print(keyMapUnmodified[r][c]);
       Serial.print(", ");
     }
