@@ -172,29 +172,28 @@ void ScanKeys() {
 }
 
 void WriteKeys() {
-  for (uint8_t c = 0; c < column_count; c++){
-    for (uint8_t r = 0; r < row_count; r++) {
-      if (keyMapStatus[r][c] == true && keyMapHistory[r][c] == false) {
-        Keyboard.press(keyMapUnmodified[c][r]); // column and row need to reversed. Sure I'm derping on something here, but it works
-      } else if (keyMapStatus[r][c] == false && keyMapHistory[r][c] == true) {
-        Keyboard.release(keyMapUnmodified[c][r]); // column and row need to reversed. Sure I'm derping on something here, but it works
+  for (uint8_t column = 0; column < column_count; column++){
+    for (uint8_t row = 0; row < row_count; row++) {
+      if (keyMapStatus[row][column] && !keyMapHistory[row][column]) {
+        Keyboard.press(keyMapUnmodified[column][row]); // column and row need to reversed. Sure I'm derping on something here, but it works
+      } else if (!keyMapStatus[row][column] && keyMapHistory[row][column]) {
+        Keyboard.release(keyMapUnmodified[column][row]); // column and row need to reversed. Sure I'm derping on something here, but it works
       }
     }
   }
 
-  if (statusRestore == true && historyRestore == false) {
+  if (statusRestore && !historyRestore) {
     Keyboard.press(178);
-  } else if (statusRestore == false && historyRestore == true) {
+  } else if (!statusRestore && historyRestore) {
     Keyboard.release(178);
   }
 
-  if (statusShiftlock == true && historyShiftlock == false) {
+  if (statusShiftlock && !historyShiftlock) {
     Keyboard.write(193);
-  } else if (statusShiftlock == false && historyShiftlock ==true) {
+  } else if (!statusShiftlock && historyShiftlock) {
     Keyboard.write(193);
   }
 }
-
 
 void SetLED(int requestedStatus) {
   if (SYSTEM_RGB_ENABLED) {
