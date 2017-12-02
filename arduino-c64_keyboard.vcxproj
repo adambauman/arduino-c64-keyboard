@@ -80,6 +80,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CD4051.h" />
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="__vm\.arduino-c64_keyboard.vsarduino.h" />
   </ItemGroup>
