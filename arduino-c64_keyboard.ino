@@ -25,11 +25,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Common.h"
-#include "C64KeyMaps.h"
-#include "Configuration.h"
-#include "RgbLed.h"
-#include "CD4051.h"
-#include "KeyMatrix.h"
 
 RgbLed status_led(
 	PIN_RGB_RED, 
@@ -60,7 +55,8 @@ CD4051 column_cd4051(
   PIN_CD4051_COLUMN_COMMON
 );
 
-KeyMaps c64_key_maps;
+C64KeyMap key_map_generator;
+KeyMap c64_key_map = key_map_generator.GetC64KeyMap();
 KeyMatrix usb_key_matrix(true);
 
 void setup() {
@@ -84,7 +80,7 @@ void loop() {
 		  column_cd4051, 
 		  PIN_ROW_8,
 		  PIN_SHIFT_LOCK,
-		  c64_key_maps,
+		  c64_key_map,
 		  SYSTEM_DEBUG_ENABLED
 	  );
       start_time = millis();
