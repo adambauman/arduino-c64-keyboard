@@ -24,6 +24,7 @@ uint8_t g_c64_keymap_shifted[8][8] = {
 	{ KEYDEC_INS,  0,           KEYDEC_BSLA, KEYDEC_UP,   KEYDEC_F2,   KEYDEC_F4,    KEYDEC_F6,   KEYDEC_F8 },
 };
 
+//TODO: Flesh out character modes
 uint8_t g_c64_keymap_character_mode[8][8] = {
 	{ 0,   0,   0,   0,   0,   0,   0,   195 },
 	{ 0,   195, 218, 0,   192, 191, 0,   193 },
@@ -45,6 +46,14 @@ uint8_t g_c64_keymap_shift_character_mode[8][8] = {
 	{ 0,   0,   0,   0,   0,   0,   0,   0 },
 	{ 0,   0,   0,   0,   0,   0,   0,   0 },
 };
+
+C64KeyMap::C64KeyMap() {
+	this->m_left_shift.row = 1;
+	this->m_left_shift.column = 3;
+
+	this->m_right_shift.row = 6;
+	this->m_right_shift.column = 4;
+}
 
 uint8_t C64KeyMap::GetKeyCode(uint8_t &column, uint8_t &row, uint8_t keymode)
 {

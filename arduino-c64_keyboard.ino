@@ -29,10 +29,6 @@
 #include "CD4051.h"
 #include "KeyMatrix.h"
 
-// Size of the keyboard matrix. C64 is technically 9x9 but the RESTORE key lives on its own and is handled seperatly
-const uint8_t row_count = 8;
-const uint8_t column_count = 8;
-
 // Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
 unsigned long startTime = 0;
 unsigned int debounceTime = 10;
@@ -42,24 +38,20 @@ CD4051 cd4051_row(PIN_CD4051_ROW_A0, PIN_CD4051_ROW_A1, PIN_CD4051_ROW_A2, PIN_C
 KeyMatrix key_matrix;
 
 void setup() {
-  if (SYSTEM_DEBUG_ENABLED)
-    Serial.begin(115200);
-
-  cd4051_column.SetAsOutput();
-  cd4051_row.SetAsInputPullup();
+	if (SYSTEM_DEBUG_ENABLED) { Serial.begin(115200); }
 
   // All key reading pins use the internal pullup resistors
+  // Row drops low when button closed to column. Drop columns LOW so they're ready.
+  cd4051_column.SetAsOutput();
+  cd4051_row.SetAsInputPullup();
   pinMode(PIN_SHIFT_LOCK, INPUT_PULLUP);
   pinMode(PIN_COLUMN_I, OUTPUT);
   pinMode(PIN_ROW_8, INPUT_PULLUP);
-
-  // Row drops low when button closed to column. Drop columns LOW so they're ready.
   digitalWrite(PIN_CD4051_COLUMN_COMMON, LOW);
   digitalWrite(PIN_COLUMN_I, LOW);
 
   key_matrix.StartKeyboard();
 }
-
 
 void loop() {
   if  ((millis() - startTime) > debounceTime) {
@@ -67,7 +59,6 @@ void loop() {
       startTime = millis();
   } 
 }
-
 
 void SetLED(int requestedStatus) {
   if (SYSTEM_RGB_ENABLED) {
@@ -97,35 +88,3 @@ void SetLED(int requestedStatus) {
     }
   }
 }
-
-
-/*oid DebugKeys() {
-  int shouldSend = 0;
-  
-  Serial.println("");
-  for (uint8_t c = 0; c < column_count; c++) {  
-    for (uint8_t r = 0; r < row_count; r++) {
-      Serial.print(keyMapHistory[r][c]);
-      Serial.print(", ");
-
-      if (keyMapHistory[r][c] == true)
-        shouldSend = keyMapUnmodified[r][c]; 
-    }
-    Serial.println("");
-  }
-
-  Serial.println("");
-  Serial.println("KeymapUnmodified: ");
-
-  for (uint8_t c = 0; c < column_count; c++) {
-    for (uint8_t r = 0; r < row_count; r++) {
-      Serial.print(keyMapUnmodified[r][c]);
-      Serial.print(", ");
-    }
-    Serial.println("");
-  }
-  
-  Serial.print("Should send: ");
-  Serial.println(shouldSend);
-  Serial.println("");
-}*/
