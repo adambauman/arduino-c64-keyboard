@@ -33,56 +33,14 @@
 const uint8_t row_count = 8;
 const uint8_t column_count = 8;
 
-//// Set if matrix is changed, stops loop from writing unnecessary key commands
-//boolean keysHaveChanged = false;
-//
-//// Tracks state of modifier keys (currently unused, running custom OS keymaps instead)
-//boolean shiftState = false;
-//boolean altState = false;
-//boolean ctrlState = false;
-//boolean capsLockState = false;
-//
-//// Tracks RESTORE and SHIFTLOCK parameters
-//boolean historyRestore = false;
-//boolean historyShiftlock = false;
-//boolean statusRestore = false;
-//boolean statusShiftlock = false;
-
 // Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
 unsigned long startTime = 0;
 unsigned int debounceTime = 10;
   
-//// Matrix of key status during a single scan loop
-//boolean keyMapStatus[row_count][column_count] = {
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false}
-//};
-//
-//// Matrix of key status during the last scan loop, compared to determine if keys have changed
-//boolean keyMapHistory[row_count][column_count] = {
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false},
-//  {false,false,false,false,false,false,false,false}
-//};
-
 CD4051 cd4051_column(PIN_CD4051_COLUMN_A0, PIN_CD4051_COLUMN_A1, PIN_CD4051_COLUMN_A2, PIN_CD4051_COLUMN_COMMON);
 CD4051 cd4051_row(PIN_CD4051_ROW_A0, PIN_CD4051_ROW_A1, PIN_CD4051_ROW_A2, PIN_CD4051_ROW_COMMON);
 KeyMatrix key_matrix;
 
-//
-// setup()
-//
 void setup() {
   if (SYSTEM_DEBUG_ENABLED)
     Serial.begin(115200);
@@ -99,7 +57,6 @@ void setup() {
   digitalWrite(PIN_CD4051_COLUMN_COMMON, LOW);
   digitalWrite(PIN_COLUMN_I, LOW);
 
-  //Keyboard.begin();
   key_matrix.StartKeyboard();
 }
 
@@ -108,71 +65,9 @@ void loop() {
   if  ((millis() - startTime) > debounceTime) {
       key_matrix.ProcessKeyMatrix(cd4051_row, cd4051_column);
       startTime = millis();
-  }
-
-  // Fire off the keys if key status have changed
-  //if (keysHaveChanged == true)
-  //  WriteKeys();
-
-  // Mirror the status key map into the history key map
-  //for (uint8_t c = 0; c < column_count; c++) {  
-	 // for (uint8_t r = 0; r < row_count; keyMapHistory[r][c] = keyMapStatus[r][c], r++) {}
-  //}
-
-  //// Mirror the status of the special keys
-  //historyRestore = statusRestore;
-
-  //if (SYSTEM_DEBUG_ENABLED && keysHaveChanged == true)
-  //  DebugKeys();
-
-  //// Reset tracking variables, go for another loop
-  //keysHaveChanged = false;
-    
-} // End loop()
-
-
-void ScanKeys() {
-	//for (uint8_t column = 0; column < column_count; column++) {
-	//	cd4015_column.Select(column);
-	//	for (uint8_t row = 0; row < row_count; row++) {
-	//		cd4015_row.Select(row);
-	//		keyMapStatus[row][column] = false;
-	//		if (!digitalRead(PIN_CD4051_ROW_COMMON)) { keyMapStatus[row][column] = true; } //Key active if LOW
-	//		if (keyMapStatus[row][column] != keyMapHistory[row][column]) { keysHaveChanged = true; }
-	//	}
-	//}
-
-	//statusRestore = false;
- //   if (!digitalRead(PIN_ROW_8)) { statusRestore = true; }
-	//statusShiftlock = false;
-	//if (!digitalRead(PIN_SHIFT_LOCK)) { statusShiftlock = true; }
-
-	//if (historyRestore != statusRestore || historyShiftlock != statusShiftlock) { keysHaveChanged = true; }
+  } 
 }
 
-void WriteKeys() {
-  //for (uint8_t column = 0; column < column_count; column++){
-  //  for (uint8_t row = 0; row < row_count; row++) {
-  //    if (keyMapStatus[row][column] && !keyMapHistory[row][column]) {
-  //      Keyboard.press(keyMapUnmodified[column][row]); // column and row need to reversed. Sure I'm derping on something here, but it works
-  //    } else if (!keyMapStatus[row][column] && keyMapHistory[row][column]) {
-  //      Keyboard.release(keyMapUnmodified[column][row]); // column and row need to reversed. Sure I'm derping on something here, but it works
-  //    }
-  //  }
-  //}
-
-  //if (statusRestore && !historyRestore) {
-  //  Keyboard.press(178);
-  //} else if (!statusRestore && historyRestore) {
-  //  Keyboard.release(178);
-  //}
-
-  //if (statusShiftlock && !historyShiftlock) {
-  //  Keyboard.write(193);
-  //} else if (!statusShiftlock && historyShiftlock) {
-  //  Keyboard.write(193);
-  //}
-}
 
 void SetLED(int requestedStatus) {
   if (SYSTEM_RGB_ENABLED) {

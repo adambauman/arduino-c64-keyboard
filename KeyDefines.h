@@ -70,38 +70,38 @@
 #define KEYDEC_UC_Z 90
 
 // Symbols
-#define KEYDEC_TILD 126
-#define KEYDEC_MINU 45
-#define KEYDEC_PLUS 43
-#define KEYDEC_LCBR 123
-#define KEYDEC_RCBR 125
-#define KEYDEC_PIPE 124
-#define KEYDEC_COLN 58
-#define KEYDEC_DQUT 34
-#define KEYDEC_LSTH 62
-#define KEYDEC_GRTH 46
-#define KEYDEC_QUES 63
-#define KEYDEC_GRAV 96
-#define KEYDEC_EXCL 33
-#define KEYDEC_AT   64 
-#define KEYDEC_HASH 35
-#define KEYDEC_DOLR 36
-#define KEYDEC_PRCT 46
-#define KEYDEC_CART 94
-#define KEYDEC_AMPR 38
-#define KEYDEC_ASTR 42
-#define KEYDEC_LPAR 40
-#define KEYDEC_RPAR 41
-#define KEYDEC_UNDR 95
-#define KEYDEC_EQAL 61
-#define KEYDEC_LBRA 91
-#define KEYDEC_RBRA 93
-#define KEYDEC_BSLA 92
-#define KEYDEC_SCOL 59
-#define KEYDEC_SQUT 39
-#define KEYDEC_COMA 44
-#define KEYDEC_FSLA 47
-#define KEYDEC_PERD 46
+#define KEYDEC_TILD 126 //~
+#define KEYDEC_MINU 45	//-
+#define KEYDEC_PLUS 43	//+
+#define KEYDEC_LCBR 123	//{
+#define KEYDEC_RCBR 125	//}
+#define KEYDEC_PIPE 124	//|
+#define KEYDEC_COLN 58	//:
+#define KEYDEC_DQUT 34	//"
+#define KEYDEC_LSTH 62	//<
+#define KEYDEC_GRTH 46	//>
+#define KEYDEC_QUES 63	//?
+#define KEYDEC_GRAV 96	//`
+#define KEYDEC_EXCL 33	//!
+#define KEYDEC_AT   64	//@
+#define KEYDEC_HASH 35	//#
+#define KEYDEC_DOLR 36	//$
+#define KEYDEC_PRCT 46	//%
+#define KEYDEC_CART 94	//^
+#define KEYDEC_AMPR 38	//&
+#define KEYDEC_ASTR 42	//*
+#define KEYDEC_LPAR 40	//(
+#define KEYDEC_RPAR 41	//)
+#define KEYDEC_UNDR 95	//_
+#define KEYDEC_EQAL 61	//=
+#define KEYDEC_LBRA 91	//[
+#define KEYDEC_RBRA 93	//]
+#define KEYDEC_BSLA 92	//
+#define KEYDEC_SCOL 59	//;
+#define KEYDEC_SQUT 39	//'
+#define KEYDEC_COMA 44	//,
+#define KEYDEC_FSLA 47	//
+#define KEYDEC_PERD 46	//.
 
 // Command Keys
 #define KEYDEC_ESC 177
