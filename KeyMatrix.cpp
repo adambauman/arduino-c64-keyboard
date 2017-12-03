@@ -42,7 +42,7 @@ uint8_t g_c64_keymap_unmodified[8][8] = {
 uint8_t g_c64_keymap_shifted[8][8] = {
 	{ KEYDEC_EXCL, KEYDEC_TILD, 0,           0,           0,           0,            KEYDEC_UC_Q, KEYDEC_DQUT },
 	{ KEYDEC_HASH, KEYDEC_UC_W, 0,           0,           0,           0,            0,           KEYDEC_DOLR },
-	{ KEYDEC_SQUT, 0,           0,           0,           0,            0,           0,           KEYDEC_LPAR },
+	{ KEYDEC_SQUT, 0,           0,           0,           0,           0,           0,           KEYDEC_LPAR },
 	{ KEYDEC_PRCT, 0,           0,           0,           0,           KEYDEC_H,     0,           KEYDEC_AMPR },
 	{ KEYDEC_RPAR, 0,           0,           0,           0,           0,            0,           0			 },
 	{ 0,           0,           0,           60,          KEYDEC_LSTH, KEYDEC_LBRA,  0,           KEYDEC_UNDR },
@@ -79,7 +79,14 @@ boolean g_history_shiftlock = false;
 boolean g_status_restore = false;
 boolean g_status_shiftlock = false;
 
-KeyMatrix::KeyMatrix() {}
+KeyMatrix::KeyMatrix() {
+	//NOTE: Position of shift keys in matrix
+	//TODO: assign dynamically after implementing keymap files
+	this->m_left_shift_key.position_row = 1;
+	this->m_left_shift_key.position_column = 3;
+	this->m_right_shift_key.position_row = 6;
+	this->m_right_shift_key.position_column = 4;
+}
 
 void KeyMatrix::ProcessKeyMatrix(CD4051 &cd4051_row, CD4051 &cd4051_column)
 {
@@ -116,10 +123,10 @@ void KeyMatrix::WriteKeys() {
 	for (uint8_t column = 0; column < g_column_count; column++) {
 		for (uint8_t row = 0; row < g_row_count; row++) {
 			if (g_active_matrix_current[row][column] && !g_active_matrix_last[row][column]) {
-				Keyboard.press(g_c64_keymap_unmodified[column][row]); // column and row need to reversed. Sure I'm derping on something here, but it works
+				Keyboard.press(this->GetKeyCode(column, row)); 
 			}
 			else if (!g_active_matrix_current[row][column] && g_active_matrix_last[row][column]) {
-				Keyboard.release(g_c64_keymap_unmodified[column][row]); // column and row need to reversed. Sure I'm derping on something here, but it works
+				Keyboard.release(this->GetKeyCode(column, row)); 
 			}
 		}
 	}
@@ -152,9 +159,29 @@ void KeyMatrix::StartKeyboard() {
 	Keyboard.begin();
 }
 
-void KeyMatrix::ClearQueues() {
-	int press_queue_size = sizeof(this->m_press_queue) * sizeof(uint8_t);
-	int release_queue_size = sizeof(this->m_release_queue) * sizeof(uint8_t);
-	for (int index = 0; press_queue_size > index; this->m_press_queue[index] = 0, index++) {}
-	for (int index = 0; release_queue_size > index; this->m_release_queue[index] = 0, index++) {}
+bool KeyMatrix::IsShiftKeyActive() {
+	bool is_shift_active = false;
+	bool left_shift_active = g_active_matrix_current[this->m_left_shift_key.position_column][this->m_left_shift_key.position_row];
+	bool right_shift_active = g_active_matrix_current[this->m_right_shift_key.position_column][this->m_right_shift_key.position_row];
+	if (left_shift_active || right_shift_active) { is_shift_active = true; }
+	return(is_shift_active);
+}
+
+uint8_t KeyMatrix::GetKeyCode(uint8_t &column, uint8_t &row) {
+	uint8_t requested_key_code = 0;
+	//NOTE: Column and row are flipped here otherwise wonky keycodes come out
+	if (true == this->IsShiftKeyActive()) {
+#ifdef _DEBUG
+		Serial.println("Codeset: Shifted");
+#endif
+		requested_key_code = g_c64_keymap_shifted[column][row];
+	}
+	else {
+#ifdef _DEBUG
+		Serial.println("Codeset: Unmodified");
+#endif
+		requested_key_code = g_c64_keymap_unmodified[column][row];
+	}
+
+	return(requested_key_code);
 }

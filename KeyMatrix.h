@@ -5,6 +5,11 @@
 #include "CD4051.h"
 #endif
 
+struct ShiftKey {
+	uint8_t position_row;
+	uint8_t position_column;
+};
+
 class KeyMatrix {
 	public:
 		KeyMatrix();
@@ -15,11 +20,13 @@ class KeyMatrix {
 		void ScanKeyMatrix(CD4051 &cd4051_row, CD4051 &cd4051_column);
 		void WriteKeys();
 		void UpdateActivityMatrix();
-		void ClearQueues();
+		uint8_t GetKeyCode(uint8_t &column, uint8_t &row);
+		bool IsShiftKeyActive();
 		
 	private:
-		uint8_t m_press_queue[20];
-		uint8_t m_release_queue[20];
+		ShiftKey m_left_shift_key;
+		ShiftKey m_right_shift_key;
+		
 };
 
 #endif
