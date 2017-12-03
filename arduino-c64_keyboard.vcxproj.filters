@@ -44,7 +44,7 @@
     <ClCompile Include="KeyMatrix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C64KeyMaps.cpp">
+    <ClCompile Include="C64KeyMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

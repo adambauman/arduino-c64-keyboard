@@ -1,15 +1,15 @@
 // BauTek C64 PiCase Keyboard Controller
-// Version 0.4, August 2016
+// Version 0.5, August 2017
 // Written by Adam Bauman (adam@kungfutreachery.net, https://bitbucket.org/adambauman/arduino-c64_keyboard)
 //
-// Utilizes an ATmega32U4-based microcontroller and two CD4051 muxers to run a Commodore64
-// keyboard as a USBHID device. Optionally you can also run a RGB status LED and alternate keymaps.
+// Utilizes an ATmega32U4-based microcontroller and two CD4051 multiplexers to run a Commodore64
+// keyboard as a USBHID device. Optionally you can also run a RGB status LED and battery monitoring circuit.
 //
 // See included wiring diagrams for hardware setup. The C64 keyboard requires one minor modification, you must
 // de-solder the leads on the SHIFTLOCK key and run one to the microcontroller ground, the other to pin 9.
 //
 //
-// Copyright (C) 2016, Adam J. Bauman
+// Copyright (C) 2017, Adam J. Bauman
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General Public License as published by
@@ -40,8 +40,8 @@ KeyMatrix key_matrix;
 void setup() {
 	if (SYSTEM_DEBUG_ENABLED) { Serial.begin(115200); }
 
-  // All key reading pins use the internal pullup resistors
-  // Row drops low when button closed to column. Drop columns LOW so they're ready.
+  //NOTE: All key reading pins use the internal pullup resistors,
+  //	  row drops low when button closed to column. Drop columns LOW so they're ready.
   cd4051_column.SetAsOutput();
   cd4051_row.SetAsInputPullup();
   pinMode(PIN_SHIFT_LOCK, INPUT_PULLUP);

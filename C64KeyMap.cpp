@@ -61,7 +61,7 @@ uint8_t C64KeyMap::GetKeyCode(uint8_t &column, uint8_t &row, uint8_t keymode)
 #ifdef _DEBUG
 	Serial.print("Codeset: "); Serial.println(keymode);
 #endif
-	//NOTE: Column and row are flipped here otherwise wonky keycodes come out
+	//NOTE: Column and Row are flipped here otherwise wonky keycodes come out
 	switch (keymode) {
 	case(KEYMODE_NORMAL):
 		requested_key_code = g_c64_keymap_unmodified[column][row];

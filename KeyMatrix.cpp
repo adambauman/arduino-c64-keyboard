@@ -1,9 +1,11 @@
 #include <Arduino.h>
 #include <Keyboard.h>
+#include "CD4051.h"
 #include "KeyMatrix.h"
+#include "Configuration.h"
 #include "C64KeyMap.h"
 
-//TODO: convert globals to member variables as possible
+//TODO: Convert globals to member variables where possible
 const uint8_t g_column_count = 8;
 const uint8_t g_row_count = 8;
 boolean g_keys_pending_write = false;
@@ -55,26 +57,24 @@ void KeyMatrix::ScanKeyMatrix(CD4051 &cd4051_row, CD4051 &cd4051_column)
 		for (uint8_t row = 0; row < g_row_count; row++) {
 			cd4051_row.Select(row);
 			g_active_matrix_current[row][column] = false;
-			//TODO: replace with PIN_CD4051_ROW_COMMON read common function
-			if (!digitalRead(10)) { g_active_matrix_current[row][column] = true; } //Key active if LOW
+			//NOTE: Key is active if LOW
+			if (!cd4051_row.ReadCommonValue()) { g_active_matrix_current[row][column] = true; } 
 			if (g_active_matrix_current[row][column] != g_active_matrix_last[row][column]) { g_keys_pending_write = true; }
 		}
 	}
 
-	// Special handling for off-matrix restore and shiftlock keys
+	//NOTE: Special handling for off-matrix restore and shiftlock keys
 	g_status_restore = false;
-	//TODO: replace with PIN_ROW_8 variable
-	if (!digitalRead(1)) { g_status_restore = true; }
+	if (!digitalRead(PIN_ROW_8)) { g_status_restore = true; }
 	g_status_shiftlock = false;
-	//TODO: replace with PIN_SHIFT_LOCK variable
-	if (!digitalRead(9)) { g_status_shiftlock = true; }
+	if (!digitalRead(PIN_SHIFT_LOCK)) { g_status_shiftlock = true; }
 
 	if (g_history_restore != g_status_restore || g_history_shiftlock != g_status_shiftlock) { g_keys_pending_write = true; }
 }
 
 void KeyMatrix::WriteKeys() {
 	uint8_t keymode = KEYMODE_NORMAL;
-	if (this->IsShiftKeyActive()) { keymode = KEYMODE_SHIFT; }
+	if (this->IsShiftMode()) { keymode = KEYMODE_SHIFT; }
 	for (uint8_t column = 0; column < g_column_count; column++) {
 		for (uint8_t row = 0; row < g_row_count; row++) {
 			if (g_active_matrix_current[row][column] && !g_active_matrix_last[row][column]) {
@@ -86,7 +86,7 @@ void KeyMatrix::WriteKeys() {
 		}
 	}
 
-	// Special handling for off-matrix restore and shiftlock keys
+	//NOTE: Special handling for off-matrix restore and shiftlock keys
 	if (g_status_restore && !g_history_restore) {
 		Keyboard.press(178);
 	}
@@ -115,7 +115,7 @@ void KeyMatrix::StartKeyboard() {
 	Keyboard.begin();
 }
 
-bool KeyMatrix::IsShiftKeyActive() {
+bool KeyMatrix::IsShiftMode() {
 	bool is_shift_active = false;
 	bool left_shift_active = g_active_matrix_current[g_c64_key_map.m_left_shift.column][g_c64_key_map.m_left_shift.row];
 	bool right_shift_active = g_active_matrix_current[g_c64_key_map.m_right_shift.column][g_c64_key_map.m_right_shift.row];
