@@ -151,3 +151,10 @@ void KeyMatrix::UpdateActivityMatrix() {
 void KeyMatrix::StartKeyboard() {
 	Keyboard.begin();
 }
+
+void KeyMatrix::ClearQueues() {
+	int press_queue_size = sizeof(this->m_press_queue) * sizeof(uint8_t);
+	int release_queue_size = sizeof(this->m_release_queue) * sizeof(uint8_t);
+	for (int index = 0; press_queue_size > index; this->m_press_queue[index] = 0, index++) {}
+	for (int index = 0; release_queue_size > index; this->m_release_queue[index] = 0, index++) {}
+}

@@ -15,6 +15,11 @@ class KeyMatrix {
 		void ScanKeyMatrix(CD4051 &cd4051_row, CD4051 &cd4051_column);
 		void WriteKeys();
 		void UpdateActivityMatrix();
+		void ClearQueues();
+		
+	private:
+		uint8_t m_press_queue[20];
+		uint8_t m_release_queue[20];
 };
 
 #endif
