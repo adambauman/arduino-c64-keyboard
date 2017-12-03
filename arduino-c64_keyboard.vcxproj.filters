@@ -30,6 +30,9 @@
     <ClInclude Include="KeyMatrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KeyDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CD4051.cpp">

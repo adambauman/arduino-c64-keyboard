@@ -86,7 +86,7 @@
 #define KEYDEC_AT   64	//@
 #define KEYDEC_HASH 35	//#
 #define KEYDEC_DOLR 36	//$
-#define KEYDEC_PRCT 46	//%
+#define KEYDEC_PRCT 37	//%
 #define KEYDEC_CART 94	//^
 #define KEYDEC_AMPR 38	//&
 #define KEYDEC_ASTR 42	//*
@@ -96,12 +96,13 @@
 #define KEYDEC_EQAL 61	//=
 #define KEYDEC_LBRA 91	//[
 #define KEYDEC_RBRA 93	//]
-#define KEYDEC_BSLA 92	//
+#define KEYDEC_BSLA 92	//Backslash
 #define KEYDEC_SCOL 59	//;
 #define KEYDEC_SQUT 39	//'
 #define KEYDEC_COMA 44	//,
-#define KEYDEC_FSLA 47	//
+#define KEYDEC_FSLA 47	//Forwardslash
 #define KEYDEC_PERD 46	//.
+#define KEYDEC_LPND 156 //British Pound
 
 // Command Keys
 #define KEYDEC_ESC 177
