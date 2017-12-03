@@ -33,12 +33,18 @@
     <ClInclude Include="KeyDefines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="C64KeyMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CD4051.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KeyMatrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C64KeyMaps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -20,7 +20,7 @@ class KeyMatrix {
 		void ScanKeyMatrix(CD4051 &cd4051_row, CD4051 &cd4051_column);
 		void WriteKeys();
 		void UpdateActivityMatrix();
-		uint8_t GetKeyCode(uint8_t &column, uint8_t &row);
+		//uint8_t GetKeyCode(uint8_t &column, uint8_t &row);
 		bool IsShiftKeyActive();
 		
 	private:
