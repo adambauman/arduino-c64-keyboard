@@ -1,7 +1,3 @@
-// KeyDefines.h
-//
-// Defines constants for ANSI keyboard codes using decimal values.
-
 #ifndef KEY_DEFINES_H
 #define KEY_DEFINES_H
 
