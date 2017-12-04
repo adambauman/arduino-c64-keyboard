@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include <Keyboard.h>
+#include "Configuration.h"
 #include "CD4051.h"
 #include "KeyMatrix.h"
-#include "Configuration.h"
+#include "RgbLed.h"
 #include "C64KeyMap.h"
 
 //TODO: Convert globals to member variables where possible

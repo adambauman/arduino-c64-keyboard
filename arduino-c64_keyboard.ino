@@ -27,6 +27,7 @@
 #include <Arduino.h>
 #include "Configuration.h"
 #include "CD4051.h"
+#include "RgbLed.h"
 #include "KeyMatrix.h"
 
 // Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
@@ -37,20 +38,26 @@ CD4051 cd4051_column(PIN_CD4051_COLUMN_A0, PIN_CD4051_COLUMN_A1, PIN_CD4051_COLU
 CD4051 cd4051_row(PIN_CD4051_ROW_A0, PIN_CD4051_ROW_A1, PIN_CD4051_ROW_A2, PIN_CD4051_ROW_COMMON);
 KeyMatrix key_matrix;
 
+#ifdef _RGB_ENABLED
+RgbLed status_led(PIN_RGB_RED, PIN_RGB_GREEN, PIN_RGB_BLUE);
+#endif
+
 void setup() {
-	if (SYSTEM_DEBUG_ENABLED) { Serial.begin(115200); }
+#ifdef _DEBUG
+	Serial.begin(115200);
+#endif
 
-  //NOTE: All key reading pins use the internal pullup resistors,
-  //	  row drops low when button closed to column. Drop columns LOW so they're ready.
-  cd4051_column.SetAsOutput();
-  cd4051_row.SetAsInputPullup();
-  pinMode(PIN_SHIFT_LOCK, INPUT_PULLUP);
-  pinMode(PIN_COLUMN_I, OUTPUT);
-  pinMode(PIN_ROW_8, INPUT_PULLUP);
-  digitalWrite(PIN_CD4051_COLUMN_COMMON, LOW);
-  digitalWrite(PIN_COLUMN_I, LOW);
+	//NOTE: All key reading pins use the internal pullup resistors,
+	//	  row drops low when button closed to column. Drop columns LOW so they're ready.
+	cd4051_column.SetAsOutput();
+	cd4051_row.SetAsInputPullup();
+	pinMode(PIN_SHIFT_LOCK, INPUT_PULLUP);
+	pinMode(PIN_COLUMN_I, OUTPUT);
+	pinMode(PIN_ROW_8, INPUT_PULLUP);
+	digitalWrite(PIN_CD4051_COLUMN_COMMON, LOW);
+	digitalWrite(PIN_COLUMN_I, LOW);
 
-  key_matrix.StartKeyboard();
+	key_matrix.StartKeyboard();
 }
 
 void loop() {
@@ -58,33 +65,4 @@ void loop() {
       key_matrix.ProcessKeyMatrix(cd4051_row, cd4051_column);
       startTime = millis();
   } 
-}
-
-void SetLED(int requestedStatus) {
-  if (SYSTEM_RGB_ENABLED) {
-    switch (requestedStatus) {
-      case 0: // Normal (red)
-        analogWrite(PIN_RGB_RED, 255);
-        analogWrite(PIN_RGB_GREEN, 0);
-        analogWrite(PIN_RGB_BLUE, 0);
-        break;
-      case 1: // Capslock Enabled (blue)
-        analogWrite(PIN_RGB_RED, 0);
-        analogWrite(PIN_RGB_GREEN, 0);
-        analogWrite(PIN_RGB_BLUE, 255);
-        break;
-      case 2: // Battery Good (green)
-        analogWrite(PIN_RGB_RED, 0);
-        analogWrite(PIN_RGB_GREEN, 255);
-        analogWrite(PIN_RGB_BLUE, 0);
-        break;
-      case 3: // Battery Warning (yellow)
-        analogWrite(PIN_RGB_RED, 255);
-        analogWrite(PIN_RGB_GREEN, 255);
-        analogWrite(PIN_RGB_BLUE, 0);
-        break;
-      default:
-        break;
-    }
-  }
 }

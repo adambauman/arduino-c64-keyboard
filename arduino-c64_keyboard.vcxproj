@@ -85,12 +85,14 @@
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="KeyDefines.h" />
     <ClInclude Include="KeyMatrix.h" />
+    <ClInclude Include="RgbLed.h" />
     <ClInclude Include="__vm\.arduino-c64_keyboard.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="C64KeyMap.cpp" />
     <ClCompile Include="CD4051.cpp" />
     <ClCompile Include="KeyMatrix.cpp" />
+    <ClCompile Include="RgbLed.cpp" />
   </ItemGroup>
   <PropertyGroup>
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>

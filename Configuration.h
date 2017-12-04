@@ -4,10 +4,9 @@
 // Define _DEBUG to enable inline serial debugging
 #define _DEBUG
 
-// Enabled serial debug, RGB lighting, battery monitoring
-#define SYSTEM_DEBUG_ENABLED		true
-#define SYSTEM_RGB_ENABLED			true
-#define SYSTEM_BATTERY_ENABLED		true
+// Enable RGB lighting, battery monitoring
+#define _RGB_ENABLED
+//#define _SYSTEM_BATTERY_ENABLED
 
 // Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
 #define SYSTEM_DEBOUNCE_TIME		10

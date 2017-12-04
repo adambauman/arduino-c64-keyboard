@@ -36,6 +36,9 @@
     <ClInclude Include="C64KeyMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RgbLed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CD4051.cpp">
@@ -45,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C64KeyMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RgbLed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
