@@ -39,7 +39,7 @@
 #define KEYDEC_8   56
 #define KEYDEC_9   57
 
-// Alpha Upercase
+// Alpha Uppercase
 #define KEYDEC_UC_A 65
 #define KEYDEC_UC_B 66
 #define KEYDEC_UC_C 67
@@ -78,8 +78,8 @@
 #define KEYDEC_PIPE 124	//|
 #define KEYDEC_COLN 58	//:
 #define KEYDEC_DQUT 34	//"
-#define KEYDEC_LSTH 62	//<
-#define KEYDEC_GRTH 46	//>
+#define KEYDEC_LSTH 60	//<
+#define KEYDEC_GRTH 62	//>
 #define KEYDEC_QUES 63	//?
 #define KEYDEC_GRAV 96	//`
 #define KEYDEC_EXCL 33	//!
