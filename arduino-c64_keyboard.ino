@@ -24,7 +24,7 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <Arduino.h>
+#include "Common.h"
 #include "Configuration.h"
 #include "CD4051.h"
 #include "RgbLed.h"
@@ -39,14 +39,18 @@ CD4051 cd4051_row(PIN_CD4051_ROW_A0, PIN_CD4051_ROW_A1, PIN_CD4051_ROW_A2, PIN_C
 KeyMatrix key_matrix;
 
 #ifdef _RGB_ENABLED
-RgbLed status_led(PIN_RGB_RED, PIN_RGB_GREEN, PIN_RGB_BLUE);
+RgbLed power_led(PIN_RGB_RED, PIN_RGB_GREEN, PIN_RGB_BLUE, LED_COLOR_RED, 0.1);
 #endif
 
 void setup() {
+	power_led.C64StartupCycle(80, 5);
+
 #ifdef _DEBUG
 	Serial.begin(115200);
+	delay(5000);
+	Serial.println("Debug starting");
 #endif
-
+	
 	//NOTE: All key reading pins use the internal pullup resistors,
 	//	  row drops low when button closed to column. Drop columns LOW so they're ready.
 	cd4051_column.SetAsOutput();

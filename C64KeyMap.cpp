@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include "Common.h"
 #include "KeyDefines.h"
 #include "C64KeyMap.h"
 

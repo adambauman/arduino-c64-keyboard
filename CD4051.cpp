@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include "Common.h"
 #include "CD4051.h"
 
 CD4051::CD4051(uint8_t pin_a0, uint8_t pin_a1, uint8_t pin_a2, uint8_t pin_common_io)
@@ -35,7 +35,7 @@ uint8_t CD4051::ReadCommonValue()
 {
 	uint8_t common_value = digitalRead(this->m_pin_common_io);
 #ifdef _DEBUG
-	Serial.print("Common IO Value: "); Serial.println(common_value);
+	//Serial.print("Common IO Value: "); Serial.println(common_value);
 #endif
     return (common_value);
 }

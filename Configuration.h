@@ -1,9 +1,6 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-// Define _DEBUG to enable inline serial debugging
-#define _DEBUG
-
 // Enable RGB lighting, battery monitoring
 #define _RGB_ENABLED
 //#define _SYSTEM_BATTERY_ENABLED

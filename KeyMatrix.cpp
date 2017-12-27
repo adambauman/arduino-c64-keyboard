@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include "Common.h"
 #include <Keyboard.h>
 #include "Configuration.h"
 #include "CD4051.h"
