@@ -30,12 +30,19 @@ class RgbLed {
 
         void SetColor(const RgbColor &rgb_color);
 		void SetIntensity(const float intensity_multiplier);
-		void FadeToColor(const RgbColor &target_color, int fade_time);
+		void FadeToColor(const RgbColor &target_color, int step_time);
 		void Reset();
 		void C64StartupCycle(const int inter_color_delay, const uint8_t loop_count);
 
 	private:
 		void C64StartupCycleAction(const uint8_t &inter_color_delay);
+		uint8_t CalculateFadeSteps(
+			const uint8_t &target_value, 
+			const uint8_t &current_value
+		);
+		uint8_t CalculateFadeColor(
+			const uint8_t &current_color_value,
+			const uint8_t &index);
 
     private:
         uint8_t m_pin_red;

@@ -38,29 +38,19 @@ void RgbLed::SetIntensity(const float intensity_multiplier)
 #endif
 }
 
-void RgbLed::FadeToColor(const RgbColor &target_color, int fade_time) 
+void RgbLed::FadeToColor(const RgbColor &target_color, int step_time) 
 {
-	//TODO: (Adam) Super-janky first attempt, check out some examples and redo
 	RgbColor mixer_color = this->m_current_color;
-	char red_increment = 1;
-	char blue_increment = 1;
-	char green_increment = 1;
-	if (128 < m_current_color.red && 128 < target_color.red && m_current_color.red > target_color.red) { red_increment = -1; }
-	if (128 < m_current_color.blue && 128 < target_color.blue && m_current_color.blue > target_color.blue) { blue_increment = -1; }
-	if (128 < m_current_color.green && 128 < target_color.green && m_current_color.green > target_color.green) { green_increment = -1; }
+	uint8_t red_step = this->CalculateFadeSteps(target_color.red, mixer_color.red);
+	uint8_t green_step = this->CalculateFadeSteps(target_color.green, mixer_color.green);
+	uint8_t blue_step = this->CalculateFadeSteps(target_color.blue, mixer_color.blue);
 
-	for (;;) {
-		if (target_color.red != mixer_color.red) { mixer_color.red += red_increment; }
-		if (target_color.green != mixer_color.green) { mixer_color.green += blue_increment; }
-		if (target_color.blue != mixer_color.blue) { mixer_color.blue += green_increment; }
-
+	for (uint8_t index = 0; index <= 255; index++) {
+		mixer_color.red = this->CalculateFadeColor(mixer_color.red, index);
+		mixer_color.green = this->CalculateFadeColor(mixer_color.green, index);
+		mixer_color.blue = this->CalculateFadeColor(mixer_color.blue, index);
 		this->SetColor(mixer_color);
-		if (target_color.red == mixer_color.red
-			&& target_color.green == mixer_color.green
-			&& target_color.blue == mixer_color.blue) {
-			break;
-		}
-		delay(fade_time);
+		delay(step_time);
 	}
 }
 
@@ -89,4 +79,22 @@ void RgbLed::C64StartupCycleAction(const uint8_t &inter_color_delay)
 	delay(inter_color_delay);
 	this->SetColor(LED_COLOR_BLUE);
 	delay(inter_color_delay);
+}
+
+uint8_t RgbLed::CalculateFadeSteps(
+	const uint8_t &target_value,
+	const uint8_t &current_value)
+{
+	uint8_t step_count = current_value / target_value;
+	if (current_value < target_value) {
+		step_count = target_value / current_value;
+	}
+	return(step_count);
+}
+
+uint8_t RgbLed::CalculateFadeColor(
+	const uint8_t &current_color_value,
+	const uint8_t &index)
+{
+
 }
