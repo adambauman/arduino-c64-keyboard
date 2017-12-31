@@ -80,6 +80,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Battery.h" />
     <ClInclude Include="C64KeyMap.h" />
     <ClInclude Include="CD4051.h" />
     <ClInclude Include="Common.h" />
@@ -90,6 +91,7 @@
     <ClInclude Include="__vm\.arduino-c64_keyboard.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Battery.cpp" />
     <ClCompile Include="C64KeyMap.cpp" />
     <ClCompile Include="CD4051.cpp" />
     <ClCompile Include="KeyMatrix.cpp" />

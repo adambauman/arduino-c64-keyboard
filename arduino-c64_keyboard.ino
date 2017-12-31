@@ -28,6 +28,7 @@
 #include "Configuration.h"
 #include "CD4051.h"
 #include "RgbLed.h"
+#include "Battery.h"
 #include "KeyMatrix.h"
 
 // Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
@@ -38,18 +39,30 @@ CD4051 cd4051_column(PIN_CD4051_COLUMN_A0, PIN_CD4051_COLUMN_A1, PIN_CD4051_COLU
 CD4051 cd4051_row(PIN_CD4051_ROW_A0, PIN_CD4051_ROW_A1, PIN_CD4051_ROW_A2, PIN_CD4051_ROW_COMMON);
 KeyMatrix key_matrix;
 
+#ifdef _SYSTEM_BATTERY_ENABLED
+Battery battery(PIN_BATTERY_SENSOR, PIN_BATTERY_BUTTON);
+#endif
+
 #ifdef _RGB_ENABLED
 RgbLed power_led(PIN_RGB_RED, PIN_RGB_GREEN, PIN_RGB_BLUE, LED_COLOR_RED, 0.1);
 #endif
 
 void setup() {
+#ifdef _RGB_ENABLED
 	power_led.C64StartupCycle(80, 5);
+#endif
 
 #ifdef _DEBUG
 	Serial.begin(115200);
 	Serial.print("Debug in: ");
 	for (uint8_t index = 5; index != 0; Serial.print(index), Serial.print(", "), delay(1000), index--);
 	Serial.println("Debug starting");
+
+	//NOTE: (Adam) Un-comment if you want to capture battery calibration data
+	//			to the serial terminal. This requires placing a constant load on
+	//			the battery and parsing the terminal information, then setting
+	//			the threshold levels in Battery.h.
+	battery.CalibrateBatteryLevels(20);
 #endif
 	
 	//NOTE: All key reading pins use the internal pullup resistors,
@@ -68,6 +81,11 @@ void setup() {
 void loop() {
   if  ((millis() - startTime) > debounceTime) {
       key_matrix.ProcessKeyMatrix(cd4051_row, cd4051_column);
+#ifdef _SYSTEM_BATTERY_ENABLED
+	  if (battery.UserRequestedLevelCheck()) {
+		  battery.FlashLedLevelIndicator(power_led);
+	  }
+#endif
       startTime = millis();
   } 
 }

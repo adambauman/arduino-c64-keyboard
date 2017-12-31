@@ -3,7 +3,7 @@
 
 // Enable RGB lighting, battery monitoring
 #define _RGB_ENABLED
-//#define _SYSTEM_BATTERY_ENABLED
+#define _SYSTEM_BATTERY_ENABLED
 
 // Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
 #define SYSTEM_DEBOUNCE_TIME		10
