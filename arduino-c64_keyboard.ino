@@ -1,5 +1,5 @@
 // BauTek C64 PiCase Keyboard Controller
-// Version 0.5, August 2017
+// Version 0.55, August 2017
 // Written by Adam Bauman (adam@kungfutreachery.net, https://bitbucket.org/adambauman/arduino-c64_keyboard)
 //
 // Utilizes an ATmega32U4-based microcontroller and two CD4051 multiplexers to run a Commodore64
@@ -47,7 +47,8 @@ void setup() {
 
 #ifdef _DEBUG
 	Serial.begin(115200);
-	delay(5000);
+	Serial.print("Debug in: ");
+	for (uint8_t index = 5; index != 0; Serial.print(index), Serial.print(", "), delay(1000), index--);
 	Serial.println("Debug starting");
 #endif
 	

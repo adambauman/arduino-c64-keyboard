@@ -44,11 +44,19 @@ void RgbLed::FadeToColor(const RgbColor &target_color, int step_time)
 	uint8_t red_step = this->CalculateFadeSteps(target_color.red, mixer_color.red);
 	uint8_t green_step = this->CalculateFadeSteps(target_color.green, mixer_color.green);
 	uint8_t blue_step = this->CalculateFadeSteps(target_color.blue, mixer_color.blue);
+#ifdef _DEBUG
+	Serial.print("red_step: "); Serial.print(red_step); Serial.print(" green_step: "); Serial.print(green_step); Serial.print(" blue_step: "); Serial.println(blue_step);
+#endif
+	//NOTE: (Adam): This is still janky and should be considered unimplemented for now
+	//TODO: (Adam): Implement proper color cross-fading
 
-	for (uint8_t index = 0; index <= 255; index++) {
-		mixer_color.red = this->CalculateFadeColor(mixer_color.red, index);
-		mixer_color.green = this->CalculateFadeColor(mixer_color.green, index);
-		mixer_color.blue = this->CalculateFadeColor(mixer_color.blue, index);
+	for (uint8_t index = 0; index <= 765; index++) {
+		mixer_color.red = this->CalculateFadeColor(mixer_color.red, red_step, index);
+		mixer_color.green = this->CalculateFadeColor(mixer_color.green, green_step, index);
+		mixer_color.blue = this->CalculateFadeColor(mixer_color.blue, blue_step, index);
+#ifdef _DEBUG
+		Serial.print("fade red: "); Serial.print(mixer_color.red); Serial.print(" green: "); Serial.print(mixer_color.green); Serial.print(" blue: "); Serial.println(mixer_color.blue);
+#endif
 		this->SetColor(mixer_color);
 		delay(step_time);
 	}
@@ -81,20 +89,61 @@ void RgbLed::C64StartupCycleAction(const uint8_t &inter_color_delay)
 	delay(inter_color_delay);
 }
 
-uint8_t RgbLed::CalculateFadeSteps(
-	const uint8_t &target_value,
-	const uint8_t &current_value)
+void RgbLed::Blink(
+	const int blink_count,
+	const int blink_delay)
 {
-	uint8_t step_count = current_value / target_value;
+	this->Blink(blink_count, blink_delay, this->m_current_color);
+}
+
+void RgbLed::Blink(
+	const int blink_count,
+	const int blink_delay,
+	const RgbColor blink_color)
+{
+	RgbColor starting_color = this->m_current_color;
+	for (int index = 0; blink_count > index; index++) {
+		this->SetColor(blink_color);
+		delay(blink_delay);
+		this->SetColor(LED_COLOR_BLACK);
+		delay(blink_delay);
+	}
+	this->SetColor(starting_color);
+}
+
+
+int8_t RgbLed::CalculateFadeSteps(
+	uint8_t target_value,
+	uint8_t current_value)
+{
+#ifdef _DEBUG
+	//Serial.print("Fade target: "); Serial.print(target_value); Serial.print(" Current value: "); Serial.println(current_value);
+#endif
+	if (0 == target_value && 0 == current_value) { return(0); }
+
+	if (2 > target_value) { target_value = 2; }
+	if (2 > current_value) { current_value = 2; }
+	int8_t step_count = current_value / target_value;
+	step_count = -step_count;
 	if (current_value < target_value) {
 		step_count = target_value / current_value;
+		Serial.println(step_count);
 	}
+
 	return(step_count);
 }
 
 uint8_t RgbLed::CalculateFadeColor(
 	const uint8_t &current_color_value,
+	const int8_t &step_count,
 	const uint8_t &index)
 {
+	//TODO: (Adam) Removed scrub debug output
+	uint8_t calculated_color_value = current_color_value;
+	if (0 == index % step_count) { 
+		calculated_color_value = current_color_value + step_count;
+		Serial.print("modulas hit, clc_color_value: "); Serial.println(calculated_color_value);
+	}
 
+	return(calculated_color_value);
 }
