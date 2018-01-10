@@ -2,10 +2,11 @@
 #define BATTERY_H
 
 //TODO: (Adam) Setup calibration rigging and set these values after testing
-#define BATTERY_LEVEL_HIGH 128
-#define BATTERY_LEVEL_MEDIUM 100
-#define BATTERY_LEVEL_LOW 60
-#define BATTERY_LEVEL_CRITICAL 40
+#define BATTERY_LEVEL_HIGH 606
+#define BATTERY_LEVEL_MEDIUM 540
+#define BATTERY_LEVEL_LOW 358
+#define BATTERY_LEVEL_CRITICAL 195
+#define BATTERY_LEVEL_DEAD 12
 
 class Battery
 {
@@ -17,7 +18,6 @@ public:
 	void CalibrateBatteryLevels(
 		const int lower_reading_limit,
 		const long read_interval = 60000);
-	bool UserRequestedLevelCheck();
 
 private:
 	int GetBatteryLevel();

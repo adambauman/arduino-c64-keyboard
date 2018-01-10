@@ -13,12 +13,15 @@ Battery::~Battery(){}
 
 void Battery::FlashLedLevelIndicator(RgbLed &battery_led)
 {
+	//NOTE: (Adam) Works well for packs with multi-stage status LEDs, if you have
+	//			a pack that can be cracked opened then reading actual cell voltage
+	//		    would be a neat feature to implement
 	int battery_level = this->GetBatteryLevel();
 	if (battery_level > BATTERY_LEVEL_MEDIUM) {
 		battery_led.Blink(3 , 400, LED_COLOR_GREEN);
 	} else if (battery_level > BATTERY_LEVEL_LOW) {
 		battery_led.Blink(3 , 400, LED_COLOR_YELLOW);
-	} else if (battery_level > BATTERY_LEVEL_CRITICAL) {
+	} else if (battery_level > BATTERY_LEVEL_DEAD) {
 		battery_led.Blink(10, 100, LED_COLOR_RED);
 	}
 }
@@ -53,15 +56,4 @@ int Battery::GetBatteryLevel()
 	Serial.print("Battery photo_sense reading: "); Serial.println(battery_level, DEC);
 #endif
 	return(battery_level);
-}
-
-bool Battery::UserRequestedLevelCheck()
-{
-	if (!digitalRead(this->m_pin_check_trigger)) { 
-#ifdef _DEBUG
-		Serial.println("User requests battery level check");
-#endif
-		return(true); 
-	}
-	return(false);
 }

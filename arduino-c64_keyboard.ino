@@ -32,8 +32,11 @@
 #include "KeyMatrix.h"
 
 // Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
-unsigned long startTime = 0;
-unsigned int debounceTime = 10;
+unsigned long loop_time = 0;
+unsigned int debounce_time = 10;
+
+unsigned long battery_button_press_time = 0;
+unsigned int battery_button_shutdown_hold_time = 4000;
   
 CD4051 cd4051_column(PIN_CD4051_COLUMN_A0, PIN_CD4051_COLUMN_A1, PIN_CD4051_COLUMN_A2, PIN_CD4051_COLUMN_COMMON);
 CD4051 cd4051_row(PIN_CD4051_ROW_A0, PIN_CD4051_ROW_A1, PIN_CD4051_ROW_A2, PIN_CD4051_ROW_COMMON);
@@ -60,10 +63,12 @@ void setup() {
 
 	//NOTE: (Adam) Un-comment if you want to capture battery calibration data
 	//			to the serial terminal. This requires placing a constant load on
-	//			the battery and parsing the terminal information, then setting
-	//			the threshold levels in Battery.h.
-	battery.CalibrateBatteryLevels(20);
+	//			the battery and parsing the serial terminal information, then setting
+	//			the threshold levels in Battery.h
+	//battery.CalibrateBatteryLevels(20);
 #endif
+
+	pinMode(PIN_BATTERY_BUTTON, INPUT_PULLUP);
 	
 	//NOTE: All key reading pins use the internal pullup resistors,
 	//	  row drops low when button closed to column. Drop columns LOW so they're ready.
@@ -79,13 +84,24 @@ void setup() {
 }
 
 void loop() {
-  if  ((millis() - startTime) > debounceTime) {
+  if  ((millis() - loop_time) > debounce_time) {
       key_matrix.ProcessKeyMatrix(cd4051_row, cd4051_column);
+
+	  bool battery_button_pushed = !digitalRead(PIN_BATTERY_BUTTON);
+	  if (0 == battery_button_press_time && battery_button_pushed) {
+		  //battery_button_press_time = millis();
 #ifdef _SYSTEM_BATTERY_ENABLED
-	  if (battery.UserRequestedLevelCheck()) {
 		  battery.FlashLedLevelIndicator(power_led);
-	  }
 #endif
-      startTime = millis();
+	  }
+	 // else if (0 < battery_button_press_time && !battery_button_pushed) {
+		//  if ((millis() - battery_button_press_time) > battery_button_shutdown_hold_time) {
+		//}
+	 // }
+	 // else if (!battery_button_pushed) {
+		//  battery_button_press_time = 0;
+	 // }
+
+      loop_time = millis();
   } 
 }
