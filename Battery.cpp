@@ -26,6 +26,34 @@ void Battery::FlashLedLevelIndicator(RgbLed &battery_led)
 	}
 }
 
+void Battery::CheckStatusButton(bool &shutdown_requested, RgbLed &power_led)
+{
+	shutdown_requested = false;
+	unsigned long press_time = 0;
+	if (!digitalRead(this->m_pin_check_trigger)) {
+		press_time = millis();
+		delay(SYSTEM_DEBOUNCE_TIME);
+	}
+
+	for (;;) {
+		if (0 == press_time) { break; }
+		if (SHUTDOWN_BUTTON_TIME <= (millis() - press_time)) {
+#ifdef _DEBUG
+			Serial.println("System shutdown requested");
+#endif
+			shutdown_requested = true;
+			break;
+		}
+
+		//NOTE: (Adam) No longer pushed when pin is high
+		if (digitalRead(this->m_pin_check_trigger)) {
+			this->FlashLedLevelIndicator(power_led);
+			break; 
+		} 
+
+	}
+}
+
 void Battery::CalibrateBatteryLevels(
 	const int lower_reading_limit, 
 	const long read_interval)

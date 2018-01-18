@@ -5,5 +5,6 @@
 #define _DEBUG
 
 #include <Arduino.h>
+#include "Configuration.h"
 
 #endif

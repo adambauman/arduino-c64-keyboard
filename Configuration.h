@@ -8,6 +8,9 @@
 // Debounce setup, on an ATmega32U4 @ 16MHz 10ms works pretty well
 #define SYSTEM_DEBOUNCE_TIME		10
 
+// Milliseconds to hold battery check button before sending shutdown signal
+#define SHUTDOWN_BUTTON_TIME		4000
+
 // RESTORE lives outside the muxed matrix, sends BACKSPACE
 #define PIN_ROW_8					1
 #define PIN_COLUMN_I				2

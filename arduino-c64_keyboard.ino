@@ -84,24 +84,15 @@ void setup() {
 }
 
 void loop() {
-  if  ((millis() - loop_time) > debounce_time) {
-      key_matrix.ProcessKeyMatrix(cd4051_row, cd4051_column);
-
-	  bool battery_button_pushed = !digitalRead(PIN_BATTERY_BUTTON);
-	  if (0 == battery_button_press_time && battery_button_pushed) {
-		  //battery_button_press_time = millis();
+	if  ((millis() - loop_time) > debounce_time) {
+		key_matrix.ProcessKeyMatrix(cd4051_row, cd4051_column);
+		
 #ifdef _SYSTEM_BATTERY_ENABLED
-		  battery.FlashLedLevelIndicator(power_led);
+		bool shutdown_requested = false;
+		battery.CheckStatusButton(shutdown_requested, power_led);
+		if (shutdown_requested) { key_matrix.SendShutdownKey(); }
 #endif
-	  }
-	 // else if (0 < battery_button_press_time && !battery_button_pushed) {
-		//  if ((millis() - battery_button_press_time) > battery_button_shutdown_hold_time) {
-		//}
-	 // }
-	 // else if (!battery_button_pushed) {
-		//  battery_button_press_time = 0;
-	 // }
 
-      loop_time = millis();
-  } 
+		loop_time = millis();
+	} 
 }

@@ -15,6 +15,7 @@ public:
 	~Battery();
 
 	void FlashLedLevelIndicator(RgbLed &battery_led);
+	void CheckStatusButton(bool &shutdown_requested, RgbLed &power_led);
 	void CalibrateBatteryLevels(
 		const int lower_reading_limit,
 		const long read_interval = 60000);

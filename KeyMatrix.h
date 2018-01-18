@@ -6,6 +6,7 @@ class KeyMatrix {
 		KeyMatrix();
 		void ProcessKeyMatrix(CD4051 &cd4051_row, CD4051 &cd4051_column);
 		void StartKeyboard();
+		void SendShutdownKey();
 
 	private:
 		void ScanKeyMatrix(CD4051 &cd4051_row, CD4051 &cd4051_column);

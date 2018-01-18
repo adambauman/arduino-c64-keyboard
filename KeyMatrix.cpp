@@ -116,6 +116,10 @@ void KeyMatrix::StartKeyboard() {
 	Keyboard.begin();
 }
 
+void KeyMatrix::SendShutdownKey() {
+	//NOTE: (Adam) Not implemented
+}
+
 bool KeyMatrix::IsShiftMode() {
 	bool is_shift_active = false;
 	bool left_shift_active = g_active_matrix_current[g_c64_key_map.m_left_shift.column][g_c64_key_map.m_left_shift.row];
