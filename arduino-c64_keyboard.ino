@@ -86,7 +86,7 @@ void setup() {
 void loop() {
 	if  ((millis() - loop_time) > debounce_time) {
 		key_matrix.ProcessKeyMatrix(cd4051_row, cd4051_column);
-		
+
 #ifdef _SYSTEM_BATTERY_ENABLED
 		bool shutdown_requested = false;
 		battery.CheckStatusButton(shutdown_requested, power_led);
